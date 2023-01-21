@@ -21,6 +21,7 @@ public class UiManager : MonoBehaviour
     public GameObject OpponentRibbon;
     public GameObject OpponentChaff;
     public Texture BlackBack;
+    public Text PlayerScore;
 
     void Start()
     {
@@ -36,6 +37,11 @@ public class UiManager : MonoBehaviour
         OpponentAnimal = GameObject.Find("OpponentAnimal");
         OpponentRibbon = GameObject.Find("OpponentRibbon");
         OpponentChaff = GameObject.Find("OpponentChaff");
+    }
+
+    void Update()
+    {
+        PlayerScore.text = GE.State.PlayerScoreCurrently.ToString(); // EZ CSAK TESZT
     }
 
     public void OnClickOnCard()

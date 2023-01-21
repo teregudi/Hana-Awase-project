@@ -37,8 +37,11 @@ public class Node
 
         return children;
     }
+
     private int CalculateValue()
     {
-        return State.PlayerScoreCurrently; // EZ CSAK TESZT!
+        int playerScore = State.PlayerScoreCurrently;
+        int aiScore = State.AiScoreCurrently;
+        return aiScore - playerScore;
     }
 }

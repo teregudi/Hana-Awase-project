@@ -1,9 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class StateSpace
+public class StateSpace : ICloneable
 {
     public List<Card> CardsAtPlayer { get; set; } = new List<Card>();
     public List<Card> CardsAtAI { get; set; } = new List<Card>();
@@ -13,17 +14,28 @@ public class StateSpace
 
     public int PlayerScoreCurrently
     {
-        get
-        {
-            return CalculateScore(CardsCollectedByPlayer);
-        }
+        get { return CalculateScore(CardsCollectedByPlayer); }
     }
 
-    public int AIScoreCurrently
+    public int AiScoreCurrently
     {
-        get
+        get { return CalculateScore(CardsCollectedByAI); }
+    }
+
+    public List<StateSpace> CreatePossibleStates(NodeType type)
+    {
+        switch (type)
         {
-            return CalculateScore(CardsCollectedByAI);
+            case NodeType.MAX:
+                return CreateStatesByPlayingCard(CardsAtAI, type);
+            case NodeType.MIN:
+                return CreateStatesByPlayingCard(CardsAtPlayer, type);
+            case NodeType.CHANCE_AFTER_MAX:
+                return CreateStatesByDrawingFromDeck(CardsCollectedByAI);
+            case NodeType.CHANCE_AFTER_MIN:
+                return CreateStatesByDrawingFromDeck(CardsCollectedByPlayer);
+            default:
+                return new List<StateSpace>();
         }
     }
 
@@ -135,5 +147,82 @@ public class StateSpace
         score += november == 4 ? 10 : 0;
         score += december == 4 ? 10 : 0;
         return score;
+    }
+
+    private List<StateSpace> CreateStatesByPlayingCard(List<Card> cardsInHand, NodeType type)
+    {
+        // ha már elfogytak a lapok a kézbõl
+        if (cardsInHand.Count == 0)
+            return new List<StateSpace> { (StateSpace)Clone() };
+
+        List<StateSpace> states = new List<StateSpace>();
+        foreach (var card in cardsInHand)
+        {
+            StateSpace clone = (StateSpace)Clone();
+            // kiveszi a lapot a kézbõl
+            if (type == NodeType.MAX)
+                clone.CardsAtAI.Remove(card);
+            else if (type == NodeType.MIN)
+                clone.CardsAtPlayer.Remove(card);
+
+            var matchingCards = CardsInMiddle.Where(c => c.Month == card.Month);
+            // ha nincs match, bedobja középre
+            if (matchingCards.Count() == 0)
+            {
+                clone.CardsInMiddle.Add(card);
+                states.Add(clone);
+            }
+            // ha 1 vagy 3 match van, megy mind a collectionbe
+            else if (matchingCards.Count() == 1 || matchingCards.Count() == 3)
+            {
+                if (type == NodeType.MAX)
+                {
+                    clone.CardsCollectedByAI.Add(card);
+                    clone.CardsCollectedByAI.AddRange(matchingCards);
+                }
+                else if (type == NodeType.MIN)
+                {
+                    clone.CardsCollectedByPlayer.Add(card);
+                    clone.CardsCollectedByPlayer.AddRange(matchingCards);
+                }
+                states.Add(clone);
+            }
+            // ha 2 match van, akkor két külön state keletkezik a választástól függõen
+            else if (matchingCards.Count() == 2)
+            {
+                foreach (var matchingCard in matchingCards)
+                {
+                    StateSpace cloneVariant = (StateSpace)clone.Clone();
+                    if (type == NodeType.MAX)
+                    {
+                        cloneVariant.CardsCollectedByAI.Add(card);
+                        cloneVariant.CardsCollectedByAI.Add(matchingCard);
+                    }
+                    else if (type == NodeType.MIN)
+                    {
+                        cloneVariant.CardsCollectedByPlayer.Add(card);
+                        cloneVariant.CardsCollectedByPlayer.Add(matchingCard);
+                    }
+                    states.Add(cloneVariant);
+                }
+            }
+        }
+        return states;
+    }
+
+    private List<StateSpace> CreateStatesByDrawingFromDeck(List<Card> collectedCards)
+    {
+
+    }
+
+    public object Clone()
+    {
+        StateSpace clone = (StateSpace)MemberwiseClone();
+        clone.CardsAtPlayer = new List<Card>(CardsAtPlayer);
+        clone.CardsAtAI = new List<Card>(CardsAtAI);
+        clone.CardsInMiddle = new List<Card>(CardsInMiddle);
+        clone.CardsCollectedByPlayer = new List<Card>(CardsCollectedByPlayer);
+        clone.CardsCollectedByAI = new List<Card>(CardsCollectedByAI);
+        return clone;
     }
 }
