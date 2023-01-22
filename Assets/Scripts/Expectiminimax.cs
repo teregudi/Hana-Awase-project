@@ -33,11 +33,11 @@ public static class Expectiminimax
         }
 
         // if node type is chance
-        int expectedValue = 0;
+        float expectedValue = 0;
         foreach (Node child in node.GetChildNodes())
         {
-            expectedValue += CalculateNodeValue(child, depth - 1) * node.Probability; // do I need probability?
+            expectedValue += CalculateNodeValue(child, depth - 1) * node.State.Probability; // do I need probability?
         }
-        return expectedValue;
+        return (int)expectedValue;
     }
 }

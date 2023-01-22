@@ -13,6 +13,7 @@ public class GameEngine
     public StateSpace State { get; set; } = new StateSpace();
     public int Difficulty { get; set; } = 1;
     public List<Card> Deck { get; set; } = new List<Card>();
+    public static List<Card> FULL_DECK { get; set; }
     public List<Card> RedDeck { get; set; } = new List<Card>();
     public bool IsHumanTurn { get; set; } = true;
     public Card DrawnCard { get; private set; } = null;
