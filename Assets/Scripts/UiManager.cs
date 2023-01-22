@@ -21,7 +21,7 @@ public class UiManager : MonoBehaviour
     public GameObject OpponentRibbon;
     public GameObject OpponentChaff;
     public Texture BlackBack;
-    public Text PlayerScore;
+    //public Text PlayerScore;
 
     void Start()
     {
@@ -39,10 +39,12 @@ public class UiManager : MonoBehaviour
         OpponentChaff = GameObject.Find("OpponentChaff");
     }
 
+    /*
     void Update()
-    {
+    { 
         PlayerScore.text = GE.State.PlayerScoreCurrently.ToString(); // EZ CSAK TESZT
     }
+    */
 
     public void OnClickOnCard()
     {
@@ -315,6 +317,37 @@ public class UiManager : MonoBehaviour
 
     private void HandleAiMove()
     {
-        (List<Card> fromMiddle, List<Card> toMiddle) = GE.CalculateAiMove();
+        (IEnumerable<Card> fromMiddleToCollection, IEnumerable<Card> newToMiddle, IEnumerable<Card> fromHandToCollection) = GE.CalculateAiMove();
+        foreach (var card in fromMiddleToCollection)
+        {
+            SetAiCardAside(GameObject.Find(card.Id.ToString()), card.Type);
+        }
+        foreach (var card in newToMiddle)
+        {
+            AddCardToMiddle(card);
+        }
+        foreach (var card in fromHandToCollection)
+        {
+            SetCardFromHandToAside(fromHandToCollection.First());
+        }
+    }
+
+    private void AddCardToMiddle(Card card)
+    {
+        GameObject middleCard = Instantiate(CardPrefab, new Vector2(0, 0), Quaternion.identity);
+        RawImage image = middleCard.GetComponent<RawImage>();
+        image.texture = card.FrontPic;
+        middleCard.name = card.Id.ToString();
+        middleCard.transform.SetParent(MiddleArea.transform, false);
+    }
+
+    private void SetCardFromHandToAside(Card card)
+    {
+        GameObject asideCard = Instantiate(CardPrefab, new Vector2(0, 0), Quaternion.identity);
+        RawImage image = asideCard.GetComponent<RawImage>();
+        image.texture = card.FrontPic;
+        asideCard.name = card.Id.ToString();
+        SetAiCardAside(asideCard, card.Type);
+        //middleCard.transform.SetParent(MiddleArea.transform, false);
     }
 }

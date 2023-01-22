@@ -16,11 +16,9 @@ namespace Assets.Scripts
             switch (NodeType)
             {
                 case NodeType.MAX:
-                    return CreateStatesForAI(InitialState.CardsAtAI);
+                    return CreateStatesForAI();
                 case NodeType.MIN:
                     return CreateStatesForPlayer();
-                    XXXXXXXXXXXXX
-                    // szar az egész, mert a gép nem tudhatja, milyen lapjai vannak a playernek
                 case NodeType.CHANCE_AFTER_MAX:
                     return CreateStatesByDrawingFromDeck();
                 case NodeType.CHANCE_AFTER_MIN:
@@ -30,21 +28,18 @@ namespace Assets.Scripts
             }
         }
 
-        private List<StateSpace> CreateStatesForAI(List<Card> cardsInHand)
+        private List<StateSpace> CreateStatesForAI()
         {
-            // ha már elfogytak a lapok a kézből
-            if (cardsInHand.Count == 0)
+            // ha már elfogytak a lapok a kézből, akkor egyszerűen visszaadjuk a jelenlegi state-et, jöhet a húzás
+            if (InitialState.CardsAtAI.Count == 0)
                 return new List<StateSpace> { (StateSpace)InitialState.Clone() };
 
             List<StateSpace> states = new List<StateSpace>();
-            foreach (var card in cardsInHand)
+            foreach (var card in InitialState.CardsAtAI)
             {
                 StateSpace clone = (StateSpace)InitialState.Clone();
-                // kiveszi a lapot a kézből
-                if (NodeType == NodeType.MAX)
-                    clone.CardsAtAI.Remove(card);
-                else if (NodeType == NodeType.MIN)
-                    clone.CardsAtPlayer.Remove(card);
+                // kiveszi az aktuális lapot az AI "kezéből"
+                clone.CardsAtAI.Remove(card);
 
                 var matchingCards = InitialState.CardsInMiddle.Where(c => c.Month == card.Month);
                 // ha nincs match, bedobja középre
@@ -53,19 +48,11 @@ namespace Assets.Scripts
                     clone.CardsInMiddle.Add(card);
                     states.Add(clone);
                 }
-                // ha 1 vagy 3 match van, megy mind a collectionbe
+                // ha 1 vagy 3 match van, megy minden a collectionbe
                 else if (matchingCards.Count() == 1 || matchingCards.Count() == 3)
                 {
-                    if (NodeType == NodeType.MAX)
-                    {
-                        clone.CardsCollectedByAI.Add(card);
-                        clone.CardsCollectedByAI.AddRange(matchingCards);
-                    }
-                    else if (NodeType == NodeType.MIN)
-                    {
-                        clone.CardsCollectedByPlayer.Add(card);
-                        clone.CardsCollectedByPlayer.AddRange(matchingCards);
-                    }
+                    clone.CardsCollectedByAI.Add(card);
+                    clone.CardsCollectedByAI.AddRange(matchingCards);
                     states.Add(clone);
                 }
                 // ha 2 match van, akkor két külön state keletkezik a választástól függően
@@ -74,16 +61,8 @@ namespace Assets.Scripts
                     foreach (var matchingCard in matchingCards)
                     {
                         StateSpace cloneVariant = (StateSpace)clone.Clone();
-                        if (NodeType == NodeType.MAX)
-                        {
-                            cloneVariant.CardsCollectedByAI.Add(card);
-                            cloneVariant.CardsCollectedByAI.Add(matchingCard);
-                        }
-                        else if (NodeType == NodeType.MIN)
-                        {
-                            cloneVariant.CardsCollectedByPlayer.Add(card);
-                            cloneVariant.CardsCollectedByPlayer.Add(matchingCard);
-                        }
+                        cloneVariant.CardsCollectedByAI.Add(card);
+                        cloneVariant.CardsCollectedByAI.Add(matchingCard);
                         states.Add(cloneVariant);
                     }
                 }
@@ -93,32 +72,52 @@ namespace Assets.Scripts
 
         private List<StateSpace> CreateStatesForPlayer()
         {
-            List<Card> allUnknownCards = GetAllUnknownCards();
-            //pesszimista algoritmus
-            //csak azokkal az esetekkel számol, amikor a player el tud vinni egy-egy lapot középről
-            //és ehhez még probabilyt kellene számolni
+            // ha már elfogytak a lapok a kézből, akkor egyszerűen visszaadjuk a jelenlegi state-et, jöhet a húzás
+            if (InitialState.CardsAtPlayer.Count == 0)
+                return new List<StateSpace> { (StateSpace)InitialState.Clone() };
+
+            var allUnknownCards = GetAllUnknownCards();
+            // mivel MIN ágon úgyis a legrosszabb eshetőséget vesszük,
+            // ezért csak azokat az eseteket vizsgáljuk, ahol a player el tud vinni valamit középről
             var playableCards = allUnknownCards.Where(u => InitialState.CardsInMiddle.Any(m => m.Month == u.Month));
             List<StateSpace> states = new List<StateSpace>();
-            foreach (var card in playableCards)
+            foreach (var cardFromPlayerHand in playableCards)
             {
                 StateSpace clone = (StateSpace)InitialState.Clone();
-                var matchingCards = InitialState.CardsInMiddle.Where(c => c.Month == card.Month);
-                clone.CardsCollectedByPlayer.Add(card);
-                clone.CardsCollectedByPlayer.AddRange(matchingCards);
-                clone.Probability = 1 / allUnknownCards.Count();
-                states.Add(clone);
+                var matchingCards = InitialState.CardsInMiddle.Where(c => c.Month == cardFromPlayerHand.Month);
+                if (matchingCards.Count() == 1 || matchingCards.Count() == 3)
+                {
+                    clone.CardsCollectedByPlayer.Add(cardFromPlayerHand);
+                    clone.CardsCollectedByPlayer.AddRange(matchingCards);
+                    clone.CardsInMiddle.RemoveAll(m => m.Month == cardFromPlayerHand.Month);
+                    clone.CardsAtPlayer.RemoveAt(0); // csak hogy csökkenjen a lapjai száma
+                    states.Add(clone);
+                }
+                else if (matchingCards.Count() == 2)
+                {
+                    foreach (var matchingCard in matchingCards)
+                    {
+                        clone = (StateSpace)InitialState.Clone();
+                        clone.CardsCollectedByPlayer.Add(cardFromPlayerHand);
+                        clone.CardsCollectedByPlayer.Add(matchingCard);
+                        clone.CardsInMiddle.Remove(matchingCard);
+                        clone.CardsAtPlayer.RemoveAt(0);
+                        states.Add(clone);
+                    }
+                }
             }
             return states;
         }
 
         private List<StateSpace> CreateStatesByDrawingFromDeck()
         {
-            List<Card> allUnknownCards = GetAllUnknownCards();
+            var allUnknownCards = GetAllUnknownCards();
 
             List<StateSpace> states = new List<StateSpace>();
             foreach (var drawnCard in allUnknownCards)
             {
                 StateSpace clone = (StateSpace)InitialState.Clone();
+                clone.Probability = 1 / allUnknownCards.Count();
                 var matchingCards = InitialState.CardsInMiddle.Where(c => c.Month == drawnCard.Month);
                 if (matchingCards.Count() == 0)
                 {
@@ -138,6 +137,7 @@ namespace Assets.Scripts
                         clone.CardsCollectedByPlayer.Add(drawnCard);
                         clone.CardsCollectedByPlayer.AddRange(matchingCards);
                     }
+                    clone.CardsInMiddle.RemoveAll(m => m.Month == drawnCard.Month);
                     states.Add(clone);
                 }
                 else if (matchingCards.Count() == 2)
@@ -155,6 +155,7 @@ namespace Assets.Scripts
                             clone.CardsCollectedByPlayer.Add(drawnCard);
                             clone.CardsCollectedByPlayer.Add(matchingCard);
                         }
+                        clone.CardsInMiddle.Remove(matchingCard);
                         states.Add(clone);
                     }
                 }
@@ -162,20 +163,13 @@ namespace Assets.Scripts
             return states;
         }
 
-        private List<Card> GetAllUnknownCards()
+        private IEnumerable<Card> GetAllUnknownCards()
         {
-            List<Card> allUnknownCards = new List<Card>();
-            foreach (var card in GameEngine.FULL_DECK)
-                allUnknownCards.Add(card);
-            foreach (var card in InitialState.CardsAtAI)
-                allUnknownCards.Remove(card);
-            foreach (var card in InitialState.CardsCollectedByAI)
-                allUnknownCards.Remove(card);
-            foreach (var card in InitialState.CardsCollectedByPlayer)
-                allUnknownCards.Remove(card);
-            foreach (var card in InitialState.CardsInMiddle)
-                allUnknownCards.Remove(card);
-            return allUnknownCards;
+            return GameEngine.FULL_DECK.Where(c =>
+                !InitialState.CardsAtAI.Contains(c) &&
+                !InitialState.CardsCollectedByAI.Contains(c) &&
+                !InitialState.CardsCollectedByPlayer.Contains(c) &&
+                !InitialState.CardsInMiddle.Contains(c));
         }
     }
 }

@@ -18,10 +18,7 @@ public static class AiMoveHandler
         {
 
         }
-        else if (node.Type == NodeType.CHANCE)
-        {
-
-        }
+        
         return 0;
     }
 }
