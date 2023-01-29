@@ -15,11 +15,12 @@ public class GameEngine
     public StateSpace State { get; set; } = new StateSpace();
     public int Difficulty { get; set; } = 1;
     public List<Card> Deck { get; set; } = new List<Card>();
-    public static List<Card> FULL_DECK { get; set; }
-    public List<Card> RedDeck { get; set; } = new List<Card>();
+    public static List<Card> FULL_DECK { get; set; } = new List<Card>();
+    public List<Card> RED_DECK { get; set; } = new List<Card>();
     public bool IsHumanTurn { get; set; } = true;
-    public Card DrawnCard { get; private set; } = null;
+    public Card DrawnCard { get; set; } = null;
     public bool playerMustChoose { get; set; } = false;
+    public Phase Phase { get; set; } = Phase.PLAYER_FROM_HAND;
 
     private GameEngine() { }
 
@@ -86,27 +87,38 @@ public class GameEngine
         return monthArray.Contains(4);
     }
 
-    /// <summary>
-    /// parameter 1: the card you want to move
-    /// parameter 2: if you move it from middle, mark it true, if from player hand, mark it false
-    /// </summary>
-    public void MoveCardToPlayerCollection(Card card, bool source)
+    public void MoveCardFromPlayerToCollection(GameObject cardObject)
     {
-        if (source)
+        Card card = ConvertGameObjectToCard(cardObject);
+        State.CardsAtPlayer.Remove(card);
+        State.CardsCollectedByPlayer.Add(card);
+    }
+
+    public void MoveCardFromMiddleToPlayerCollection(GameObject cardObject)
+    {
+        Card card = ConvertGameObjectToCard(cardObject);
+        var matchingCards = State.CardsInMiddle.Where(c => c.Month == card.Month);
+        if (matchingCards.Count() == 2)
         {
-            State.CardsInMiddle.Remove(card);
             State.CardsCollectedByPlayer.Add(card);
-        } else
+        }
+        else
         {
-            State.CardsAtPlayer.Remove(card);
-            State.CardsCollectedByPlayer.Add(card);
+            // check if it works fine
+            State.CardsCollectedByPlayer.AddRange(matchingCards);
         }
     }
 
-    public void MoveCardFromPlayerToMiddle(Card card)
+    public void MoveCardFromPlayerToMiddle(GameObject cardObject)
     {
+        Card card = ConvertGameObjectToCard(cardObject);
         State.CardsAtPlayer.Remove(card);
         State.CardsInMiddle.Add(card);
+    }
+
+    private Card ConvertGameObjectToCard(GameObject cardObject)
+    {
+        return FULL_DECK.First(c => c.Id == int.Parse(cardObject.name));
     }
 
     public void MoveDrawnCardToMiddle()
@@ -127,10 +139,33 @@ public class GameEngine
         Deck.RemoveAt(0);
     }
 
-    public StateSpace HandleDrawnCard()
+    public void HandleDrawnCard()
+    {
+        var matchingCards = State.CardsInMiddle.Where(c => c.Month == DrawnCard.Month);
+        if (matchingCards.Count() == 0)
+        {
+            State.CardsInMiddle.Add(DrawnCard);
+        }
+        if (matchingCards.Count() == 1 || matchingCards.Count() == 3)
+        {
+            State.CardsInMiddle.RemoveAll(m => m.Month == DrawnCard.Month);
+            if (Phase == Phase.AI_TURN)
+            {
+                State.CardsCollectedByAI.Add(DrawnCard);
+                State.CardsCollectedByAI.AddRange(matchingCards);
+            }
+            else
+            {
+                State.CardsCollectedByPlayer.Add(DrawnCard);
+                State.CardsCollectedByPlayer.AddRange(matchingCards);
+            }
+        }
+    }
+
+    public StateSpace HandleTheoreticalDrawnCard()
     {
         StateSpace modifiedState = (StateSpace)State.Clone();
-        var matchingCards = State.CardsInMiddle.Where(c => c.Month == DrawnCard.Month);
+        var matchingCards = modifiedState.CardsInMiddle.Where(c => c.Month == DrawnCard.Month);
         if (matchingCards.Count() == 0)
         {
             modifiedState.CardsInMiddle.Add(DrawnCard);
@@ -155,7 +190,7 @@ public class GameEngine
             state2.CardsInMiddle.Remove(matchingCards.ElementAt(1));
             Node node2 = new Node(state2, NodeType.MIN);
 
-            modifiedState = node1.Value > node1.Value ? state1 : state2;
+            modifiedState = node1.Value > node2.Value ? state1 : state2;
         }
         DrawnCard = null;
         return modifiedState;
@@ -165,7 +200,7 @@ public class GameEngine
     {
         //(List<Card> possibleCardsFromHand, List<Card> possibleCardsInMiddle) = GetMatchingCardsOfAi();
         //List<Card> collectedCardsFromMiddle = new List<Card>();
-        List<Card> discardedCardsToMiddle = new List<Card>();
+        //List<Card> discardedCardsToMiddle = new List<Card>();
         //List<Card> collectedCardsFromHand = new List<Card>();
 
         stateFactory.InitialState = (StateSpace)State.Clone();
@@ -176,30 +211,42 @@ public class GameEngine
         foreach (var possibleState in possibleStates)
         {
             Node node = new Node(possibleState, NodeType.CHANCE_AFTER_MAX);
-            int actualValue = Expectiminimax.CalculateNodeValue(node, 1);
+            int actualValue = Expectiminimax.CalculateNodeValue(node, Difficulty);
             if (actualValue > bestValue)
             {
                 bestValue = actualValue;
                 bestOption = possibleState;
             }
         }
-        //cards from hand to middle
-        //cards from hand to collection
-        //cards from middle to collection
-        //cards from deck to middle
-        //cards from deck to collection
-        //találd ki hogy hogy számítsd ki, hogy honnan hova és mely lapok mentek
-        var collectedCardsFromMiddle = bestOption.CardsCollectedByAI.Where(c => State.CardsInMiddle.Contains(c));
-        var collectedCardsFromHand = bestOption.CardsCollectedByAI.Where(c => State.CardsAtAI.Contains(c));
-        var newCardsInMiddle = bestOption.CardsInMiddle.Where(c => !State.CardsInMiddle.Contains(c));
+
+        var collectedCardsFromMiddle = bestOption.CardsCollectedByAI.Where(c => State.CardsInMiddle.Contains(c)).ToList();
+        var collectedCardsFromHand = bestOption.CardsCollectedByAI.Where(c => State.CardsAtAI.Contains(c)).ToList();
+        var newCardsInMiddle = bestOption.CardsInMiddle.Where(c => !State.CardsInMiddle.Contains(c)).ToList();
+
+
+        Debug.Log("BEFORE DRAWING");
+        foreach (var card in collectedCardsFromMiddle)
+            Debug.Log($"Collected card from middle: {card}");
+        foreach (var card in collectedCardsFromHand)
+            Debug.Log($"Collected card from hand: {card}");
+        foreach (var card in newCardsInMiddle)
+            Debug.Log($"New card in middle: {card}");
+
 
         State = bestOption;
         DrawCard();
-        StateSpace modifiedState = HandleDrawnCard();
-        collectedCardsFromMiddle = collectedCardsFromMiddle.Concat(modifiedState.CardsCollectedByAI.Where(c => State.CardsInMiddle.Contains(c)));
-        collectedCardsFromHand = collectedCardsFromHand.Concat(modifiedState.CardsCollectedByAI.Where(c => State.CardsAtAI.Contains(c)));
-        newCardsInMiddle = newCardsInMiddle.Concat(modifiedState.CardsInMiddle.Where(c => !State.CardsInMiddle.Contains(c)));
+        StateSpace modifiedState = HandleTheoreticalDrawnCard();
+        collectedCardsFromMiddle.AddRange(modifiedState.CardsCollectedByAI.Where(c => State.CardsInMiddle.Contains(c)));
+        newCardsInMiddle.AddRange(modifiedState.CardsInMiddle.Where(c => !State.CardsInMiddle.Contains(c)));
         State = modifiedState;
+
+        Debug.Log("AFTER DRAWING");
+        foreach (var card in collectedCardsFromMiddle)
+            Debug.Log($"Collected card from middle: {card}");
+        foreach (var card in collectedCardsFromHand)
+            Debug.Log($"Collected card from hand: {card}");
+        foreach (var card in newCardsInMiddle)
+            Debug.Log($"New card in middle: {card}");
 
 
         /*

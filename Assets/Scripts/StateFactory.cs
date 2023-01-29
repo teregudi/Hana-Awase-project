@@ -28,6 +28,8 @@ namespace Assets.Scripts
             }
         }
 
+        //itt a gyorsítás végett le kell kezelni az edge case-eket
+        //pl ha csak egy match van, akkor azt játsza ki és kész, a többi state-et meg sem nézzük
         private List<StateSpace> CreateStatesForAI()
         {
             // ha már elfogytak a lapok a kézből, akkor egyszerűen visszaadjuk a jelenlegi state-et, jöhet a húzás
@@ -53,6 +55,7 @@ namespace Assets.Scripts
                 {
                     clone.CardsCollectedByAI.Add(card);
                     clone.CardsCollectedByAI.AddRange(matchingCards);
+                    clone.CardsInMiddle.RemoveAll(c => c.Month == card.Month);
                     states.Add(clone);
                 }
                 // ha 2 match van, akkor két külön state keletkezik a választástól függően
@@ -63,6 +66,7 @@ namespace Assets.Scripts
                         StateSpace cloneVariant = (StateSpace)clone.Clone();
                         cloneVariant.CardsCollectedByAI.Add(card);
                         cloneVariant.CardsCollectedByAI.Add(matchingCard);
+                        cloneVariant.CardsInMiddle.Remove(matchingCard);
                         states.Add(cloneVariant);
                     }
                 }

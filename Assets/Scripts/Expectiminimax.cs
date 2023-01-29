@@ -14,6 +14,7 @@ public static class Expectiminimax
 
         if (node.Type == NodeType.MAX)
         {
+            //Debug.Log("MAXXXXXXXXXXXXXXX");
             int maxValue = int.MinValue;
             foreach (Node child in node.GetChildNodes())
             {
@@ -24,6 +25,7 @@ public static class Expectiminimax
 
         if (node.Type == NodeType.MIN)
         {
+            
             int minValue = int.MaxValue;
             foreach (Node child in node.GetChildNodes())
             {
@@ -32,11 +34,12 @@ public static class Expectiminimax
             return minValue;
         }
 
+        //Debug.Log("CHANCE");
         // if node type is chance
         float expectedValue = 0;
         foreach (Node child in node.GetChildNodes())
         {
-            expectedValue += CalculateNodeValue(child, depth - 1) * node.State.Probability; // do I need probability?
+            expectedValue += CalculateNodeValue(child, depth - 1) * node.State.Probability;
         }
         return (int)expectedValue;
     }

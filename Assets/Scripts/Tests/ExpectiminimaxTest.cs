@@ -35,7 +35,7 @@ namespace Assets.Scripts.Tests
             };
             Node initialNode = new Node(initialState, NodeType.MAX);
 
-            int expectedValue = 21;
+            //int expectedValue = 21;
 
             // ACT
             int actualValue = Expectiminimax.CalculateNodeValue(initialNode, 1);

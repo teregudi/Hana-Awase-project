@@ -118,6 +118,8 @@ public class Setup : MonoBehaviour
 
     public async void Start()
     {
+        Debug.Log("Game started.");
+
         if (boolToAvoidMoreInstantiation)
         {
             boolToAvoidMoreInstantiation = false;
@@ -173,54 +175,54 @@ public class Setup : MonoBehaviour
             GE.Deck.Add(new Card(December3, 123, CardType.CHAFF, Month.DECEMBER));
             GE.Deck.Add(new Card(December4, 124, CardType.CHAFF, Month.DECEMBER));
 
-            GE.RedDeck.Add(new Card(January1Red, 11, CardType.BRIGHT, Month.JANUARY));
-            GE.RedDeck.Add(new Card(January2Red, 12, CardType.RIBBON, Month.JANUARY));
-            GE.RedDeck.Add(new Card(January3Red, 13, CardType.CHAFF, Month.JANUARY));
-            GE.RedDeck.Add(new Card(January4Red, 14, CardType.CHAFF, Month.JANUARY));
-            GE.RedDeck.Add(new Card(February1Red, 21, CardType.ANIMAL, Month.FEBRUARY));
-            GE.RedDeck.Add(new Card(February2Red, 22, CardType.RIBBON, Month.FEBRUARY));
-            GE.RedDeck.Add(new Card(February3Red, 23, CardType.CHAFF, Month.FEBRUARY));
-            GE.RedDeck.Add(new Card(February4Red, 24, CardType.CHAFF, Month.FEBRUARY));
-            GE.RedDeck.Add(new Card(March1Red, 31, CardType.BRIGHT, Month.MARCH));
-            GE.RedDeck.Add(new Card(March2Red, 32, CardType.RIBBON, Month.MARCH));
-            GE.RedDeck.Add(new Card(March3Red, 33, CardType.CHAFF, Month.MARCH));
-            GE.RedDeck.Add(new Card(March4Red, 34, CardType.CHAFF, Month.MARCH));
-            GE.RedDeck.Add(new Card(April1Red, 41, CardType.ANIMAL, Month.APRIL));
-            GE.RedDeck.Add(new Card(April2Red, 42, CardType.RIBBON, Month.APRIL));
-            GE.RedDeck.Add(new Card(April3Red, 43, CardType.CHAFF, Month.APRIL));
-            GE.RedDeck.Add(new Card(April4Red, 44, CardType.CHAFF, Month.APRIL));
-            GE.RedDeck.Add(new Card(May1Red, 51, CardType.ANIMAL, Month.MAY));
-            GE.RedDeck.Add(new Card(May2Red, 52, CardType.RIBBON, Month.MAY));
-            GE.RedDeck.Add(new Card(May3Red, 53, CardType.CHAFF, Month.MAY));
-            GE.RedDeck.Add(new Card(May4Red, 54, CardType.CHAFF, Month.MAY));
-            GE.RedDeck.Add(new Card(June1Red, 61, CardType.ANIMAL, Month.JUNE));
-            GE.RedDeck.Add(new Card(June2Red, 62, CardType.RIBBON, Month.JUNE));
-            GE.RedDeck.Add(new Card(June3Red, 63, CardType.CHAFF, Month.JUNE));
-            GE.RedDeck.Add(new Card(June4Red, 64, CardType.CHAFF, Month.JUNE));
-            GE.RedDeck.Add(new Card(July1Red, 71, CardType.ANIMAL, Month.JULY));
-            GE.RedDeck.Add(new Card(July2Red, 72, CardType.RIBBON, Month.JULY));
-            GE.RedDeck.Add(new Card(July3Red, 73, CardType.CHAFF, Month.JULY));
-            GE.RedDeck.Add(new Card(July4Red, 74, CardType.CHAFF, Month.JULY));
-            GE.RedDeck.Add(new Card(August1Red, 81, CardType.BRIGHT, Month.AUGUST));
-            GE.RedDeck.Add(new Card(August2Red, 82, CardType.ANIMAL, Month.AUGUST));
-            GE.RedDeck.Add(new Card(August3Red, 83, CardType.CHAFF, Month.AUGUST));
-            GE.RedDeck.Add(new Card(August4Red, 84, CardType.CHAFF, Month.AUGUST));
-            GE.RedDeck.Add(new Card(September1Red, 91, CardType.ANIMAL, Month.SEPTEMBER));
-            GE.RedDeck.Add(new Card(September2Red, 92, CardType.RIBBON, Month.SEPTEMBER));
-            GE.RedDeck.Add(new Card(September3Red, 93, CardType.CHAFF, Month.SEPTEMBER));
-            GE.RedDeck.Add(new Card(September4Red, 94, CardType.CHAFF, Month.SEPTEMBER));
-            GE.RedDeck.Add(new Card(October1Red, 101, CardType.ANIMAL, Month.OCTOBER));
-            GE.RedDeck.Add(new Card(October2Red, 102, CardType.RIBBON, Month.OCTOBER));
-            GE.RedDeck.Add(new Card(October3Red, 103, CardType.CHAFF, Month.OCTOBER));
-            GE.RedDeck.Add(new Card(October4Red, 104, CardType.CHAFF, Month.OCTOBER));
-            GE.RedDeck.Add(new Card(November1Red, 111, CardType.BRIGHT, Month.NOVEMBER));
-            GE.RedDeck.Add(new Card(November2Red, 112, CardType.ANIMAL, Month.NOVEMBER));
-            GE.RedDeck.Add(new Card(November3Red, 113, CardType.RIBBON, Month.NOVEMBER));
-            GE.RedDeck.Add(new Card(November4Red, 114, CardType.CHAFF, Month.NOVEMBER));
-            GE.RedDeck.Add(new Card(December1Red, 121, CardType.BRIGHT, Month.DECEMBER));
-            GE.RedDeck.Add(new Card(December2Red, 122, CardType.CHAFF, Month.DECEMBER));
-            GE.RedDeck.Add(new Card(December3Red, 123, CardType.CHAFF, Month.DECEMBER));
-            GE.RedDeck.Add(new Card(December4Red, 124, CardType.CHAFF, Month.DECEMBER));
+            GE.RED_DECK.Add(new Card(January1Red, 11, CardType.BRIGHT, Month.JANUARY));
+            GE.RED_DECK.Add(new Card(January2Red, 12, CardType.RIBBON, Month.JANUARY));
+            GE.RED_DECK.Add(new Card(January3Red, 13, CardType.CHAFF, Month.JANUARY));
+            GE.RED_DECK.Add(new Card(January4Red, 14, CardType.CHAFF, Month.JANUARY));
+            GE.RED_DECK.Add(new Card(February1Red, 21, CardType.ANIMAL, Month.FEBRUARY));
+            GE.RED_DECK.Add(new Card(February2Red, 22, CardType.RIBBON, Month.FEBRUARY));
+            GE.RED_DECK.Add(new Card(February3Red, 23, CardType.CHAFF, Month.FEBRUARY));
+            GE.RED_DECK.Add(new Card(February4Red, 24, CardType.CHAFF, Month.FEBRUARY));
+            GE.RED_DECK.Add(new Card(March1Red, 31, CardType.BRIGHT, Month.MARCH));
+            GE.RED_DECK.Add(new Card(March2Red, 32, CardType.RIBBON, Month.MARCH));
+            GE.RED_DECK.Add(new Card(March3Red, 33, CardType.CHAFF, Month.MARCH));
+            GE.RED_DECK.Add(new Card(March4Red, 34, CardType.CHAFF, Month.MARCH));
+            GE.RED_DECK.Add(new Card(April1Red, 41, CardType.ANIMAL, Month.APRIL));
+            GE.RED_DECK.Add(new Card(April2Red, 42, CardType.RIBBON, Month.APRIL));
+            GE.RED_DECK.Add(new Card(April3Red, 43, CardType.CHAFF, Month.APRIL));
+            GE.RED_DECK.Add(new Card(April4Red, 44, CardType.CHAFF, Month.APRIL));
+            GE.RED_DECK.Add(new Card(May1Red, 51, CardType.ANIMAL, Month.MAY));
+            GE.RED_DECK.Add(new Card(May2Red, 52, CardType.RIBBON, Month.MAY));
+            GE.RED_DECK.Add(new Card(May3Red, 53, CardType.CHAFF, Month.MAY));
+            GE.RED_DECK.Add(new Card(May4Red, 54, CardType.CHAFF, Month.MAY));
+            GE.RED_DECK.Add(new Card(June1Red, 61, CardType.ANIMAL, Month.JUNE));
+            GE.RED_DECK.Add(new Card(June2Red, 62, CardType.RIBBON, Month.JUNE));
+            GE.RED_DECK.Add(new Card(June3Red, 63, CardType.CHAFF, Month.JUNE));
+            GE.RED_DECK.Add(new Card(June4Red, 64, CardType.CHAFF, Month.JUNE));
+            GE.RED_DECK.Add(new Card(July1Red, 71, CardType.ANIMAL, Month.JULY));
+            GE.RED_DECK.Add(new Card(July2Red, 72, CardType.RIBBON, Month.JULY));
+            GE.RED_DECK.Add(new Card(July3Red, 73, CardType.CHAFF, Month.JULY));
+            GE.RED_DECK.Add(new Card(July4Red, 74, CardType.CHAFF, Month.JULY));
+            GE.RED_DECK.Add(new Card(August1Red, 81, CardType.BRIGHT, Month.AUGUST));
+            GE.RED_DECK.Add(new Card(August2Red, 82, CardType.ANIMAL, Month.AUGUST));
+            GE.RED_DECK.Add(new Card(August3Red, 83, CardType.CHAFF, Month.AUGUST));
+            GE.RED_DECK.Add(new Card(August4Red, 84, CardType.CHAFF, Month.AUGUST));
+            GE.RED_DECK.Add(new Card(September1Red, 91, CardType.ANIMAL, Month.SEPTEMBER));
+            GE.RED_DECK.Add(new Card(September2Red, 92, CardType.RIBBON, Month.SEPTEMBER));
+            GE.RED_DECK.Add(new Card(September3Red, 93, CardType.CHAFF, Month.SEPTEMBER));
+            GE.RED_DECK.Add(new Card(September4Red, 94, CardType.CHAFF, Month.SEPTEMBER));
+            GE.RED_DECK.Add(new Card(October1Red, 101, CardType.ANIMAL, Month.OCTOBER));
+            GE.RED_DECK.Add(new Card(October2Red, 102, CardType.RIBBON, Month.OCTOBER));
+            GE.RED_DECK.Add(new Card(October3Red, 103, CardType.CHAFF, Month.OCTOBER));
+            GE.RED_DECK.Add(new Card(October4Red, 104, CardType.CHAFF, Month.OCTOBER));
+            GE.RED_DECK.Add(new Card(November1Red, 111, CardType.BRIGHT, Month.NOVEMBER));
+            GE.RED_DECK.Add(new Card(November2Red, 112, CardType.ANIMAL, Month.NOVEMBER));
+            GE.RED_DECK.Add(new Card(November3Red, 113, CardType.RIBBON, Month.NOVEMBER));
+            GE.RED_DECK.Add(new Card(November4Red, 114, CardType.CHAFF, Month.NOVEMBER));
+            GE.RED_DECK.Add(new Card(December1Red, 121, CardType.BRIGHT, Month.DECEMBER));
+            GE.RED_DECK.Add(new Card(December2Red, 122, CardType.CHAFF, Month.DECEMBER));
+            GE.RED_DECK.Add(new Card(December3Red, 123, CardType.CHAFF, Month.DECEMBER));
+            GE.RED_DECK.Add(new Card(December4Red, 124, CardType.CHAFF, Month.DECEMBER));
 
             GameEngine.FULL_DECK = GE.Deck;
 
@@ -240,13 +242,13 @@ public class Setup : MonoBehaviour
             RawImage image = playerCard.GetComponent<RawImage>();
             image.texture = playerCards[i].FrontPic;
             playerCard.name = playerCards[i].Id.ToString();
-            playerCard.transform.SetParent(PlayerArea.transform, false);
+            PlayerArea.GetComponent<PlayerAreaScript>().Receive(playerCard);
 
             GameObject middleCard = Instantiate(CardPrefab, new Vector2(0, 0), Quaternion.identity);
             image = middleCard.GetComponent<RawImage>();
             image.texture = middleCards[i].FrontPic;
             middleCard.name = middleCards[i].Id.ToString();
-            middleCard.transform.SetParent(MiddleArea.transform, false);
+            MiddleArea.GetComponent<MiddleAreaScript>().Receive(middleCard);
 
             GameObject opponentCard = Instantiate(CardPrefab, new Vector2(0, 0), Quaternion.identity);
             image = opponentCard.GetComponent<RawImage>();
