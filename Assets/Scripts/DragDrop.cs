@@ -41,7 +41,7 @@ public class DragDrop : MonoBehaviour
     {
         startParent = transform.parent.gameObject;
         startPosition = transform.position;
-        if (GLS.IsHumanTurn &&  this.transform.parent.name == PlayerArea.name)
+        if (this.transform.parent.name == PlayerArea.name)
         {
             isDragging = true;
         } 
@@ -49,7 +49,7 @@ public class DragDrop : MonoBehaviour
 
     public void EndDrag()
     {
-        if (GLS.IsHumanTurn && isDragging && isOverMiddleArea)
+        if (isDragging && isOverMiddleArea)
         {
             isDragging = false;
             transform.SetParent(MiddleArea.transform, false);

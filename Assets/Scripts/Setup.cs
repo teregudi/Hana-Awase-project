@@ -254,7 +254,7 @@ public class Setup : MonoBehaviour
             image = opponentCard.GetComponent<RawImage>();
             image.texture = BlackBack;
             opponentCard.name = opponentCards[i].Id.ToString();
-            opponentCard.transform.SetParent(OpponentArea.transform, false);
+            OpponentArea.GetComponent<OpponentAreaScript>().Receive(opponentCard);
         }
 
         GameObject deck = Instantiate(CardPrefab, new Vector2(0, 0), Quaternion.identity);

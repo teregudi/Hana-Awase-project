@@ -214,25 +214,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9847a60c686e7b4cb86c193b205e43e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MiddleArea: {fileID: 0}
-  OpponentArea: {fileID: 0}
-  PlayerBright: {fileID: 0}
-  PlayerAnimal: {fileID: 0}
-  PlayerRibbon: {fileID: 0}
-  PlayerChaff: {fileID: 0}
-  OpponentBright: {fileID: 0}
-  OpponentAnimal: {fileID: 0}
-  OpponentRibbon: {fileID: 0}
-  OpponentChaff: {fileID: 0}
-  BlackBack: {fileID: 2800000, guid: 53a2c33a343f9934ca899964c846e005, type: 3}
-  PlayerScore: {fileID: 0}
-  AiScore: {fileID: 0}
-  cardPrefab: {fileID: 0}
-  playerAreaScript: {fileID: 0}
-  playerBrightScript: {fileID: 0}
-  playerAnimalScript: {fileID: 0}
-  playerRibbonScript: {fileID: 0}
-  playerChaffScript: {fileID: 0}
+  cardPrefab: {fileID: 8101078277246865026}
 --- !u!114 &-1462874529347157425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -245,17 +227,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2da051879d6e6504a81b0c776245913a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardPrefab: {fileID: 8101078277246865026}
-  blackBack: {fileID: 2800000, guid: 53a2c33a343f9934ca899964c846e005, type: 3}
-  playerArea: {fileID: 0}
-  middleArea: {fileID: 0}
-  playerBright: {fileID: 0}
-  playerAnimal: {fileID: 0}
-  playerRibbon: {fileID: 0}
-  playerChaff: {fileID: 0}
-  playerAreaScript: {fileID: 0}
-  middleAreaScript: {fileID: 0}
-  playerBrightScript: {fileID: 0}
-  playerAnimalScript: {fileID: 0}
-  playerRibbonScript: {fileID: 0}
-  playerChaffScript: {fileID: 0}

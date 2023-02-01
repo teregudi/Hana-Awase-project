@@ -14,17 +14,16 @@ public class MiddleAreaScript : MonoBehaviour
     private PlayerAnimalScript playerAnimalScript;
     private PlayerRibbonScript playerRibbonScript;
     private PlayerChaffScript playerChaffScript;
-    private Texture blackBack;
+    private OpponentBrightScript opponentBrightScript;
+    private OpponentAnimalScript opponentAnimalScript;
+    private OpponentRibbonScript opponentRibbonScript;
+    private OpponentChaffScript opponentChaffScript;
 
+    public Texture blackBack;
     public GameObject cardPrefab;
 
-    private GameObject OpponentBright;
-    private GameObject OpponentAnimal;
-    private GameObject OpponentRibbon;
-    private GameObject OpponentChaff;
-
-    private Text PlayerScore;
-    private Text AiScore;
+    public Text PlayerScore;
+    public Text AiScore;
 
     public List<GameObject> Cards { get; set; } = new List<GameObject>();
     public List<GameObject> MarkedCards { get; set; } = new List<GameObject>();
@@ -39,22 +38,19 @@ public class MiddleAreaScript : MonoBehaviour
         playerAnimalScript = GameObject.Find("PlayerAnimal").GetComponent<PlayerAnimalScript>();
         playerRibbonScript = GameObject.Find("PlayerRibbon").GetComponent<PlayerRibbonScript>();
         playerChaffScript = GameObject.Find("PlayerChaff").GetComponent<PlayerChaffScript>();
-
-
-        OpponentBright = GameObject.Find("OpponentBright");
-        OpponentAnimal = GameObject.Find("OpponentAnimal");
-        OpponentRibbon = GameObject.Find("OpponentRibbon");
-        OpponentChaff = GameObject.Find("OpponentChaff");
-
-
+        opponentBrightScript = GameObject.Find("OpponentBright").GetComponent<OpponentBrightScript>();
+        opponentAnimalScript = GameObject.Find("OpponentAnimal").GetComponent<OpponentAnimalScript>();
+        opponentRibbonScript = GameObject.Find("OpponentRibbon").GetComponent<OpponentRibbonScript>();
+        opponentChaffScript = GameObject.Find("OpponentChaff").GetComponent<OpponentChaffScript>();
     }
 
     void Update()
     {
-        //PlayerScore.text = GE.State.PlayerScoreCurrently.ToString();
-        //AiScore.text = GE.State.AiScoreCurrently.ToString();
-        if (GE.Phase == Phase.AI_TURN)
-            HandleAiMove();
+        PlayerScore = GameObject.Find("PlayerScore").GetComponent<Text>();
+        AiScore = GameObject.Find("AiScore").GetComponent<Text>();
+        PlayerScore.text = GE.State.PlayerScoreCurrently.ToString();
+        AiScore.text = GE.State.AiScoreCurrently.ToString();
+
         //if (GE.Deck.Count == 0 && GE.State.CardsInMiddle.Count == 0)
         //    PlayerScore.text = "game over";
     }
@@ -114,7 +110,7 @@ public class MiddleAreaScript : MonoBehaviour
             foreach (var card in MarkedCards)
             {
                 Unmark(card);
-                DeterminePlaceInCollection(card, type);
+                DeterminePlaceInCollection(card, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(card.name)).Type);
             }
             MarkedCards.Clear();
         }
@@ -125,7 +121,7 @@ public class MiddleAreaScript : MonoBehaviour
         foreach (var card in MarkedCards)
         {
             Unmark(card);
-            DeterminePlaceInCollection(card, GE.DrawnCard.Type);
+            DeterminePlaceInCollection(card, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(card.name)).Type);
         }
         MarkedCards.Clear();
     }
@@ -135,16 +131,20 @@ public class MiddleAreaScript : MonoBehaviour
         switch (type)
         {
             case CardType.BRIGHT:
-                playerBrightScript.Receive(card);
+                if (GE.Phase == Phase.AI_TURN) opponentBrightScript.Receive(card);
+                else playerBrightScript.Receive(card);
                 break;
             case CardType.ANIMAL:
-                playerAnimalScript.Receive(card);
+                if (GE.Phase == Phase.AI_TURN) opponentAnimalScript.Receive(card);
+                else playerAnimalScript.Receive(card);
                 break;
             case CardType.RIBBON:
-                playerRibbonScript.Receive(card);
+                if (GE.Phase == Phase.AI_TURN) opponentRibbonScript.Receive(card);
+                else playerRibbonScript.Receive(card);
                 break;
             case CardType.CHAFF:
-                playerChaffScript.Receive(card);
+                if (GE.Phase == Phase.AI_TURN) opponentChaffScript.Receive(card);
+                else playerChaffScript.Receive(card);
                 break;
         }
     }
@@ -153,8 +153,10 @@ public class MiddleAreaScript : MonoBehaviour
     {
         if (playerAreaScript.MarkedCard != null && !MarkedCards.Any())
         {
+            GE.MoveCardFromPlayerToMiddle(playerAreaScript.MarkedCard);
             playerAreaScript.PassToMiddle();
-            HandleFlippedCard();
+            cardPrefab.GetComponent<ClickOnCardManager>().Start();
+            cardPrefab.GetComponent<ClickOnCardManager>().HandleFlippingTopCard();
         }
     }
 
@@ -185,15 +187,36 @@ public class MiddleAreaScript : MonoBehaviour
         }
     }
 
-    public void HandleChosenCard(GameObject chosenCard)
+    public void HandleAiFlippedCard(IEnumerable<GameObject> collectedCards)
     {
-        DeterminePlaceInCollection(GameObject.Find(GE.DrawnCard.Id.ToString()), GE.DrawnCard.Type);
-        DeterminePlaceInCollection(chosenCard, GE.State.CardsInMiddle.First(c => c.Id == int.Parse(chosenCard.name)).Type);
+        if (!collectedCards.Any())
+        {
+            Receive(FlippedCard);
+            FlippedCard = null;
+            SetNewDeckPlaceholder();
+        }
+        else
+        {
+            DeterminePlaceInCollection(FlippedCard, GE.DrawnCard.Type);
+            FlippedCard = null;
+            foreach (var card in collectedCards)
+            {
+                Unmark(card);
+                DeterminePlaceInCollection(card, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(card.name)).Type);
+                MarkedCards.Remove(card);
+            }
+            ResetMarkedCards();
+            SetNewDeckPlaceholder();
+        }
+    }
+
+    public void HandleChoiceAfterDraw(GameObject chosenCard)
+    {
+        DeterminePlaceInCollection(FlippedCard, GE.DrawnCard.Type);
+        DeterminePlaceInCollection(chosenCard, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(chosenCard.name)).Type);
         MarkedCards.Remove(chosenCard);
         ResetMarkedCards();
         SetNewDeckPlaceholder();
-        GE.DrawnCard = null;
-        GE.Phase = Phase.AI_TURN;
     }
 
     private void SetNewDeckPlaceholder()
@@ -203,63 +226,5 @@ public class MiddleAreaScript : MonoBehaviour
         backOfCard.texture = blackBack;
         newDeckTopCard.name = "deck";
         newDeckTopCard.transform.SetParent(deckArea.transform, false);
-    }
-
-    // AI rész
-
-    public void HandleAiMove()
-    {
-        (IEnumerable<Card> fromMiddleToCollection, IEnumerable<Card> newToMiddle, IEnumerable<Card> fromHandToCollection) = GE.CalculateAiMove();
-        foreach (var card in fromMiddleToCollection)
-        {
-            SetAiCardAside(GameObject.Find(card.Id.ToString()), card.Type);
-        }
-        foreach (var card in newToMiddle)
-        {
-            AddCardToMiddle(card);
-        }
-        foreach (var card in fromHandToCollection)
-        {
-            SetCardFromHandToAside(fromHandToCollection.First());
-        }
-        GE.Phase = Phase.PLAYER_FROM_HAND;
-    }
-
-    private void AddCardToMiddle(Card card)
-    {
-        GameObject middleCard = Instantiate(cardPrefab, new Vector2(0, 0), Quaternion.identity);
-        RawImage image = middleCard.GetComponent<RawImage>();
-        image.texture = card.FrontPic;
-        middleCard.name = card.Id.ToString();
-        middleCard.transform.SetParent(transform, false);
-    }
-
-    private void SetCardFromHandToAside(Card card)
-    {
-        GameObject asideCard = Instantiate(cardPrefab, new Vector2(0, 0), Quaternion.identity);
-        RawImage image = asideCard.GetComponent<RawImage>();
-        image.texture = card.FrontPic;
-        asideCard.name = card.Id.ToString();
-        asideCard.transform.SetParent(transform, false);
-        SetAiCardAside(asideCard, card.Type);
-    }
-
-    private void SetAiCardAside(GameObject card, CardType type)
-    {
-        switch (type)
-        {
-            case CardType.BRIGHT:
-                card.transform.SetParent(OpponentBright.transform, false);
-                break;
-            case CardType.ANIMAL:
-                card.transform.SetParent(OpponentAnimal.transform, false);
-                break;
-            case CardType.RIBBON:
-                card.transform.SetParent(OpponentRibbon.transform, false);
-                break;
-            case CardType.CHAFF:
-                card.transform.SetParent(OpponentChaff.transform, false);
-                break;
-        }
     }
 }

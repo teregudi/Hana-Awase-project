@@ -7,13 +7,13 @@ using UnityEngine.UI;
 
 public class ClickOnCardManager : MonoBehaviour
 {
-    private GameEngine GE;
+    private GameEngine GE = GameEngine.getGE();
     private GameObject playerArea;
     private GameObject middleArea;
     private PlayerAreaScript playerAreaScript;
     private MiddleAreaScript middleAreaScript;
 
-    void Start()
+    public void Start()
     {
         GE = GameEngine.getGE();
         playerArea = GameObject.Find("PlayerArea");
@@ -22,13 +22,11 @@ public class ClickOnCardManager : MonoBehaviour
         middleAreaScript = middleArea.GetComponent<MiddleAreaScript>();
     }
 
-    // következõ refaktor:
-    // elõbb mindig GE, csak utána UI
-    // a GE Update-en keresztül hívja a UI-t?
-
     public void OnClick()
     {
-        if (GE.Phase == Phase.PLAYER_CLICK_BLOCKED)
+        //Debug.Log(GameEngine.FULL_DECK.First(c => c.Id == int.Parse(gameObject.name)));
+
+        if (GE.Phase == Phase.PLAYER_MOVE_BLOCKED)
             return;
         // when player choose a card from hand
         if (transform.parent.name == playerArea.name && GE.Phase == Phase.PLAYER_FROM_HAND)
@@ -38,7 +36,7 @@ public class ClickOnCardManager : MonoBehaviour
         // when player wants to drop chosen card to the middle
         else if (transform.parent.name == middleArea.name && playerAreaScript.MarkedCard != null && !middleAreaScript.MarkedCards.Any())
         {
-            GE.MoveCardFromPlayerToMiddle(gameObject);
+            GE.MoveCardFromPlayerToMiddle(playerAreaScript.MarkedCard);
 
             playerAreaScript.PassToMiddle();
             HandleFlippingTopCard();
@@ -46,7 +44,7 @@ public class ClickOnCardManager : MonoBehaviour
         // when player wants to collect matching cards from hand
         else if (transform.parent.name == middleArea.name && GE.Phase == Phase.PLAYER_FROM_HAND && middleAreaScript.MarkedCards.Contains(gameObject))
         {
-            GE.MoveCardFromPlayerToCollection(gameObject);
+            GE.MoveCardFromPlayerToCollection(playerAreaScript.MarkedCard);
             GE.MoveCardFromMiddleToPlayerCollection(gameObject);
 
             playerAreaScript.PassToCollection();
@@ -54,29 +52,33 @@ public class ClickOnCardManager : MonoBehaviour
             HandleFlippingTopCard();
         }
         // when player wants to collect matching cards from deck
-        else if (transform.parent.name == middleArea.name && GE.Phase != Phase.PLAYER_FROM_DECK && middleAreaScript.MarkedCards.Contains(gameObject))
+        else if (transform.parent.name == middleArea.name && GE.Phase == Phase.PLAYER_FROM_DECK && middleAreaScript.MarkedCards.Contains(gameObject))
         {
-            middleAreaScript.HandleChosenCard(gameObject);
+            GE.HandleChoiceAfterDraw(gameObject);
+            middleAreaScript.HandleChoiceAfterDraw(gameObject);
+            GE.DrawnCard = null;
+            GE.Phase = Phase.AI_TURN_BEGIN;
         }
     }
 
-    private async void HandleFlippingTopCard()
+    public async void HandleFlippingTopCard()
     {
         GE.DrawCard();
-        GE.Phase = Phase.PLAYER_CLICK_BLOCKED;
 
         middleAreaScript.FlipTopCard();
+
         if (middleAreaScript.MarkedCards.Count == 2)
         {
             GE.Phase = Phase.PLAYER_FROM_DECK;
         }
         else
         {
-            await Task.Delay(3000);
+            GE.Phase = Phase.PLAYER_MOVE_BLOCKED;
+            await Task.Delay(2000);
             GE.HandleDrawnCard();
             middleAreaScript.HandleFlippedCard();
             GE.DrawnCard = null;
-            GE.Phase = Phase.AI_TURN;
+            GE.Phase = Phase.AI_TURN_BEGIN;
         }
     }
 }

@@ -537,6 +537,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 553869505}
   m_CullTransparentMesh: 1
+--- !u!1 &694622190 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 411547407201832798, guid: 13b4dab7d1ddef04faf856317ad75e41, type: 3}
+  m_PrefabInstance: {fileID: 1647731840}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &746584161 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2427764225820331286, guid: 9219c6bb9551b2c428667ff6b77a2fd4, type: 3}
@@ -814,6 +819,11 @@ MonoBehaviour:
   December2Red: {fileID: 2800000, guid: bb199010d209dce4d883805c08263a0f, type: 3}
   December3Red: {fileID: 2800000, guid: 8246f763fafbaa34eb5aeaa1eaeb873d, type: 3}
   December4Red: {fileID: 2800000, guid: d22302262a11b7247ae3428f6f8650ad, type: 3}
+--- !u!1 &905970143 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1893079003875220728, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
+  m_PrefabInstance: {fileID: 68222854}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &944393904 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4057997764950190230, guid: 415646cc652f9364d824b06b33527276, type: 3}
@@ -824,6 +834,19 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 411547407201832799, guid: 13b4dab7d1ddef04faf856317ad75e41, type: 3}
   m_PrefabInstance: {fileID: 1647731840}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1030140245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694622190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb19cac1797b54d498ad1221624f6b09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cards: []
 --- !u!1 &1269684596 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1830923077321756501, guid: e978b4d5828ce1b4eaa558dcfdb2a956, type: 3}
@@ -834,6 +857,18 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 1830923077321756500, guid: e978b4d5828ce1b4eaa558dcfdb2a956, type: 3}
   m_PrefabInstance: {fileID: 1830923078507025953}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1269684601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1269684596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da3cc569bf1aae842b9d34d9704c60ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &1318014303 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4057997764950190231, guid: 415646cc652f9364d824b06b33527276, type: 3}
@@ -866,11 +901,42 @@ MonoBehaviour:
   playerAnimalScript: {fileID: 0}
   playerRibbonScript: {fileID: 0}
   playerChaffScript: {fileID: 0}
+--- !u!1 &1568363836 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4057997764950190230, guid: 415646cc652f9364d824b06b33527276, type: 3}
+  m_PrefabInstance: {fileID: 44415897}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1568363840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1568363836}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b665d2d6400800d43be7bfa9f38f117d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cards: []
 --- !u!224 &1641630608 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1893079003875220729, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
   m_PrefabInstance: {fileID: 68222854}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1641630612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 905970143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2495bf2955214446a3377f5b57dd34d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cards: []
 --- !u!1001 &1647731840
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1119,6 +1185,24 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5862874964354238281, guid: 33d6a5cba9da208449166b47be21a4e3, type: 3}
   m_PrefabInstance: {fileID: 5862874965804945368}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1893541028 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2427764225820331286, guid: 9219c6bb9551b2c428667ff6b77a2fd4, type: 3}
+  m_PrefabInstance: {fileID: 1819921961}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1893541032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1893541028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8976ee2517bdeb54482fe7c4aea2e87c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cards: []
 --- !u!1 &2020393168
 GameObject:
   m_ObjectHideFlags: 0
@@ -2418,23 +2502,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9847a60c686e7b4cb86c193b205e43e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MiddleArea: {fileID: 0}
-  OpponentArea: {fileID: 0}
-  PlayerBright: {fileID: 0}
-  PlayerAnimal: {fileID: 0}
-  PlayerRibbon: {fileID: 0}
-  PlayerChaff: {fileID: 0}
-  OpponentBright: {fileID: 0}
-  OpponentAnimal: {fileID: 0}
-  OpponentRibbon: {fileID: 0}
-  OpponentChaff: {fileID: 0}
+  blackBack: {fileID: 2800000, guid: 53a2c33a343f9934ca899964c846e005, type: 3}
+  cardPrefab: {fileID: 8101078277246865026, guid: b028b6425966e5046b75da7cece742b5, type: 3}
   PlayerScore: {fileID: 553869507}
   AiScore: {fileID: 2146288117}
-  cardPrefab: {fileID: 8101078277246865026, guid: b028b6425966e5046b75da7cece742b5, type: 3}
-  deckArea: {fileID: 0}
-  playerAreaScript: {fileID: 0}
-  playerBrightScript: {fileID: 0}
-  playerAnimalScript: {fileID: 0}
-  playerRibbonScript: {fileID: 0}
-  playerChaffScript: {fileID: 0}
-  blackBack: {fileID: 2800000, guid: 53a2c33a343f9934ca899964c846e005, type: 3}
