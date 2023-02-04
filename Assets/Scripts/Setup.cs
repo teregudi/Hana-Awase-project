@@ -236,7 +236,7 @@ public class Setup : MonoBehaviour
         List<Card> playerCards = GE.State.CardsAtPlayer;
         List<Card> middleCards = GE.State.CardsInMiddle;
         List<Card> opponentCards = GE.State.CardsAtAI;
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < GE.NumberOfCards; i++)
         {
             GameObject playerCard = Instantiate(CardPrefab, new Vector2(0, 0), Quaternion.identity);
             RawImage image = playerCard.GetComponent<RawImage>();

@@ -43,20 +43,8 @@ public class OpponentAreaScript : MonoBehaviour
 
     public async void HandleAiMoveFromHand()
     {
-        //Debug.Log("AFTER PLAYER TURN!!!!!!!!!!!!!!!!!!!!!!!");
-        //GE.DebugLog();
-        //Diff();
-
         await Task.Delay(1000);
         var collectedFromMiddle = GE.CalculateAiMoveFromHand();
-        Debug.Log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG");
-        foreach (var item in collectedFromMiddle)
-        {
-            Debug.Log(item);
-        }
-        Debug.Log("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG");
-        //Debug.Log("CARD AT AI: " + GE.State.CardsAtAI.First());
-        //Debug.Log("OPPONENT CARD: " + Cards.First().name);
         GameObject playedCard = null;
         foreach (var card1 in Cards)
         {
@@ -66,8 +54,6 @@ public class OpponentAreaScript : MonoBehaviour
                     played = false;
             if (played)
             {
-                Debug.Log("NA EZT JÁTSZOTTA KI: " + card1.name);
-                Debug.Log("ITT VAN A LAP: " + card1.transform.parent.name);
                 playedCard = card1;
                 break;
             } 
@@ -90,11 +76,12 @@ public class OpponentAreaScript : MonoBehaviour
             }
         }
         Cards.Remove(playedCard);
+
         await Task.Delay(1000);
-        HandleAIFlipTopCard();
+        await HandleAIFlipTopCard();
     }
 
-    public async void HandleAIFlipTopCard()
+    public async Task HandleAIFlipTopCard()
     {
         GE.DrawCard();
         middleAreaScript.FlipTopCard();
@@ -112,18 +99,13 @@ public class OpponentAreaScript : MonoBehaviour
             }
             if (collected)
             {
-                Debug.Log("AI COLLECTED THIS CARD FROM MIDDLE: " + card1.name);
                 collectedCards.Add(card1);
             }  
         }
         middleAreaScript.HandleAiFlippedCard(collectedCards);
 
         GE.DrawnCard = null;
-        GE.Phase = Phase.PLAYER_FROM_HAND;
-
-        //Debug.Log("AFTER ROBOT TURN!!!!!!!!!!!!!!!!!!!!!!!");
-        GE.DebugLog();
-        //Diff();
+        GE.Phase = GE.State.CardsAtAI.Count > 0 ? Phase.PLAYER_FROM_HAND : (GameEngine.endGameAlreadyStarted ? Phase.PLAYER_MOVE_BLOCKED : Phase.ENDGAME);
     }
 
     private void DeterminePlaceInCollection(GameObject card, CardType type)
@@ -142,24 +124,6 @@ public class OpponentAreaScript : MonoBehaviour
             case CardType.CHAFF:
                 opponentChaffScript.Receive(card);
                 break;
-        }
-    }
-
-    private void Diff()
-    {
-        var p = GE.State.CardsAtAI.Where(c1 => !Cards.Where(c2 => c2.name == c1.Id.ToString()).Any());
-        if (p.Any())
-        {
-            Debug.Log("PLAYER!!!!!!!!!!!!!!!!!!!");
-            foreach (var item in p)
-                Debug.Log(item);
-        }
-        var m = GE.State.CardsInMiddle.Where(c1 => !middleAreaScript.Cards.Where(c2 => c2.name == c1.Id.ToString()).Any());
-        if (m.Any())
-        {
-            Debug.Log("MIDDLE!!!!!!!!!!!!!!!!!!!");
-            foreach (var item in m)
-                Debug.Log(item);
         }
     }
 }

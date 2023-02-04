@@ -11,9 +11,11 @@ public class GameEngine
 {
     private static GameEngine singleton = null;
     private static StateFactory stateFactory = new StateFactory();
+    public static bool endGameAlreadyStarted = false;
 
     public StateSpace State { get; set; } = new StateSpace();
-    public int Difficulty { get; set; } = 1;
+    public int Difficulty { get; set; } = 3;
+    public int NumberOfCards { get; set; } = 8;
     public List<Card> Deck { get; set; } = new List<Card>();
     public static List<Card> FULL_DECK { get; set; } = new List<Card>();
     public List<Card> RED_DECK { get; set; } = new List<Card>();
@@ -53,15 +55,15 @@ public class GameEngine
             State.CardsAtPlayer.Clear();
             State.CardsAtAI.Clear();
             State.CardsInMiddle.Clear();
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < NumberOfCards; i++)
             {
                 State.CardsAtPlayer.Add(Deck[i]);
             }
-            for (int i = 8; i < 16; i++)
+            for (int i = NumberOfCards; i < NumberOfCards * 2; i++)
             {
                 State.CardsAtAI.Add(Deck[i]);
             }
-            for (int i = 16; i < 24; i++)
+            for (int i = NumberOfCards * 2; i < NumberOfCards * 3; i++)
             {
                 State.CardsInMiddle.Add(Deck[i]);
             }
@@ -70,7 +72,7 @@ public class GameEngine
                 CheckIfTheresFourSame(State.CardsInMiddle));
         } while (fourSame);
 
-        Deck = Deck.GetRange(24, Deck.Count-24);
+        Deck = Deck.GetRange(NumberOfCards * 3, Deck.Count - (NumberOfCards * 3));
 
         await Task.Delay(1);
     }
@@ -88,7 +90,6 @@ public class GameEngine
     public void MoveCardFromPlayerToCollection(GameObject cardObject)
     {
         Card card = State.CardsAtPlayer.First(c => c.Id == int.Parse(cardObject.name));
-        Debug.Log("MOVE CARD FROM PLAYER HAND TO COLLECTION: " + card);
         State.CardsAtPlayer.Remove(card);
         State.CardsCollectedByPlayer.Add(card);
     }
@@ -99,7 +100,6 @@ public class GameEngine
         var matchingCards = State.CardsInMiddle.Where(c => c.Month == card.Month);
         if (matchingCards.Count() < 3)
         {
-            Debug.Log("MOVE CARD FROM MIDDLE TO PLAYER COLLECTION: " + card);
             State.CardsCollectedByPlayer.Add(card);
             State.CardsInMiddle.Remove(card);
         }
@@ -107,7 +107,6 @@ public class GameEngine
         {
             foreach (var matchingCard in matchingCards)
             {
-                Debug.Log("MOVE CARD FROM MIDDLE TO PLAYER COLLECTION: " + matchingCard);
                 State.CardsCollectedByPlayer.Add(matchingCard);
                 State.CardsInMiddle.Remove(matchingCard);
             }
@@ -117,7 +116,6 @@ public class GameEngine
     public void MoveCardFromPlayerToMiddle(GameObject cardObject)
     {
         Card card = State.CardsAtPlayer.First(c => c.Id == int.Parse(cardObject.name));
-        Debug.Log("CARD DROPPED TO MIDDLE FROM PLAYER HAND: " + card);
         State.CardsAtPlayer.Remove(card);
         State.CardsInMiddle.Add(card);
     }
@@ -139,36 +137,40 @@ public class GameEngine
         if (matchingCards.Count() == 0)
         {
             State.CardsInMiddle.Add(DrawnCard);
-            Debug.Log("FLIPPED CARD ADDED TO MIDDLE: " + DrawnCard);
         }
         else if (matchingCards.Count() == 1 || matchingCards.Count() == 3)
         {
-            Debug.Log(matchingCards.Count());
             State.CardsInMiddle.RemoveAll(m => m.Month == DrawnCard.Month);
-            Debug.Log(matchingCards.Count());
             if (Phase == Phase.AI_TURN)
             {
                 State.CardsCollectedByAI.Add(DrawnCard);
-                Debug.Log("FLIPPED CARD ADDED TO AI COLLECTION: " + DrawnCard);
-                Debug.Log("MATCHING CARD ADDED TO AI COLLECTION");
                 foreach (var matchingCard in matchingCards)
                 {
                     State.CardsCollectedByAI.Add(matchingCard);
-                    Debug.Log(matchingCard);
                 }
             }
             else
             {
                 State.CardsCollectedByPlayer.Add(DrawnCard);
-                Debug.Log(matchingCards.Count());
-                Debug.Log("FLIPPED CARD ADDED TO PLAYER COLLECTION: " + DrawnCard + "\nMATCHING CARD ADDED TO PLAYER COLLECTION: ");
-                Debug.Log(matchingCards.Count());
                 foreach (var matchingCard in matchingCards)
                 {
                     State.CardsCollectedByPlayer.Add(matchingCard);
-                    Debug.Log(matchingCard);
                 }
             }
+        }
+        else if (matchingCards.Count() == 2 && Phase == Phase.AI_TURN)
+        {
+            StateSpace stateA = (StateSpace)State.Clone();
+            stateA.CardsInMiddle.Remove(matchingCards[0]);
+            Node nodeA = new Node(stateA, NodeType.MIN);
+            int scoreA = Expectiminimax.CalculateNodeValue(nodeA, Difficulty);
+
+            StateSpace stateB = (StateSpace)State.Clone();
+            stateB.CardsInMiddle.Remove(matchingCards[1]);
+            Node nodeB = new Node(stateB, NodeType.MIN);
+            int scoreB = Expectiminimax.CalculateNodeValue(nodeB, Difficulty);
+
+            State = scoreA > scoreB ? stateA : stateB;
         }
     }
 
@@ -210,32 +212,28 @@ public class GameEngine
                 collectedFromMiddle.Add(c1);
         }
         //var collectedFromMiddle = possibleStates[indexOfMostFavorableState].CardsCollectedByAI.Where(c => State.CardsInMiddle.Contains(c)).ToList();
-        Debug.Log("REAL STATE BEFORE MERGE");
-        DebugLog();
         State = possibleStates[indexOfMostFavorableState];
-        Debug.Log("REAL STATE AFTER MERGE");
-        DebugLog();
         return collectedFromMiddle;
     }
 
-    public void DebugLog()
-    {
-        StringBuilder sb = new StringBuilder();
-        sb.Append("Cards at player:\n");
-        foreach (var item in State.CardsAtPlayer)
-        {
-            sb.Append("- " + item);
-        }
-        sb.Append("\nCards at robot:\n");
-        foreach (var item in State.CardsAtAI)
-        {
-            sb.Append("- " + item);
-        }
-        sb.Append("\nCards in middle:\n");
-        foreach (var item in State.CardsInMiddle)
-        {
-            sb.Append("- " + item);
-        }
-        Debug.Log(sb.ToString());
-    }
+    //public void DebugLog()
+    //{
+    //    StringBuilder sb = new StringBuilder();
+    //    sb.Append("Cards at player:\n");
+    //    foreach (var item in State.CardsAtPlayer)
+    //    {
+    //        sb.Append("- " + item);
+    //    }
+    //    sb.Append("\nCards at robot:\n");
+    //    foreach (var item in State.CardsAtAI)
+    //    {
+    //        sb.Append("- " + item);
+    //    }
+    //    sb.Append("\nCards in middle:\n");
+    //    foreach (var item in State.CardsInMiddle)
+    //    {
+    //        sb.Append("- " + item);
+    //    }
+    //    Debug.Log(sb.ToString());
+    //}
 }

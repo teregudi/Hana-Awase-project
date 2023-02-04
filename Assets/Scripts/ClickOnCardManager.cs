@@ -57,7 +57,7 @@ public class ClickOnCardManager : MonoBehaviour
             GE.HandleChoiceAfterDraw(gameObject);
             middleAreaScript.HandleChoiceAfterDraw(gameObject);
             GE.DrawnCard = null;
-            GE.Phase = Phase.AI_TURN_BEGIN;
+            GE.Phase = GE.State.CardsAtPlayer.Count > 0 ? Phase.AI_TURN_BEGIN : Phase.PLAYER_MOVE_BLOCKED;
         }
     }
 

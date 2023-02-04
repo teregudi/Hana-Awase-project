@@ -10,6 +10,7 @@ public class MiddleAreaScript : MonoBehaviour
     private GameEngine GE;
     private GameObject deckArea;
     private PlayerAreaScript playerAreaScript;
+    private OpponentAreaScript opponentAreaScript;
     private PlayerBrightScript playerBrightScript;
     private PlayerAnimalScript playerAnimalScript;
     private PlayerRibbonScript playerRibbonScript;
@@ -38,6 +39,7 @@ public class MiddleAreaScript : MonoBehaviour
         playerAnimalScript = GameObject.Find("PlayerAnimal").GetComponent<PlayerAnimalScript>();
         playerRibbonScript = GameObject.Find("PlayerRibbon").GetComponent<PlayerRibbonScript>();
         playerChaffScript = GameObject.Find("PlayerChaff").GetComponent<PlayerChaffScript>();
+        opponentAreaScript = GameObject.Find("OpponentArea").GetComponent<OpponentAreaScript>();
         opponentBrightScript = GameObject.Find("OpponentBright").GetComponent<OpponentBrightScript>();
         opponentAnimalScript = GameObject.Find("OpponentAnimal").GetComponent<OpponentAnimalScript>();
         opponentRibbonScript = GameObject.Find("OpponentRibbon").GetComponent<OpponentRibbonScript>();
@@ -51,8 +53,17 @@ public class MiddleAreaScript : MonoBehaviour
         PlayerScore.text = GE.State.PlayerScoreCurrently.ToString();
         AiScore.text = GE.State.AiScoreCurrently.ToString();
 
-        //if (GE.Deck.Count == 0 && GE.State.CardsInMiddle.Count == 0)
-        //    PlayerScore.text = "game over";
+        if (GE.Phase == Phase.ENDGAME)
+        {
+            GE.Phase = Phase.PLAYER_MOVE_BLOCKED;
+            GameEngine.endGameAlreadyStarted = true;
+            EndGame();
+        }
+
+        if (GE.Phase == Phase.GAME_OVER)
+        {
+            Debug.Log("GAME OVER");
+        }
     }
 
     public void Receive(GameObject card)
@@ -221,10 +232,49 @@ public class MiddleAreaScript : MonoBehaviour
 
     private void SetNewDeckPlaceholder()
     {
+        if (GE.Deck.Count == 0 && GE.State.CardsInMiddle.Count == 0) return;
         GameObject newDeckTopCard = Instantiate(cardPrefab, new Vector2(0, 0), Quaternion.identity);
         RawImage backOfCard = newDeckTopCard.GetComponent<RawImage>();
         backOfCard.texture = blackBack;
         newDeckTopCard.name = "deck";
         newDeckTopCard.transform.SetParent(deckArea.transform, false);
+    }
+
+    private async void EndGame()
+    {
+        while (GE.Deck.Count > 0 && GE.State.CardsInMiddle.Count > 0)
+        {
+            await Task.Delay(1000);
+            GE.DrawCard();
+            FlipTopCard();
+            if (MarkedCards.Count == 2)
+            {
+                GE.Phase = Phase.PLAYER_FROM_DECK;
+                await WaitForPlayerToChoose();
+            }
+            else
+            {
+                await Task.Delay(2000);
+                GE.HandleDrawnCard();
+                HandleFlippedCard();
+                GE.DrawnCard = null;
+            }
+
+            if (GE.Deck.Count == 0 && GE.State.CardsInMiddle.Count == 0)
+            {
+                break;
+            }
+
+            GE.Phase = Phase.AI_TURN;
+            await Task.Delay(1000);
+            await opponentAreaScript.HandleAIFlipTopCard();
+        }
+        GE.Phase = Phase.GAME_OVER;
+    }
+
+    private async Task WaitForPlayerToChoose()
+    {
+        while (GE.Phase != Phase.PLAYER_MOVE_BLOCKED);
+        await Task.Delay(1000);
     }
 }
