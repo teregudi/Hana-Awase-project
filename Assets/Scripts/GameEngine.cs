@@ -14,7 +14,7 @@ public class GameEngine
     public static bool endGameAlreadyStarted = false;
 
     public StateSpace State { get; set; } = new StateSpace();
-    public int Difficulty { get; set; } = 3;
+    public int Difficulty { get; set; } = 6;
     public int NumberOfCards { get; set; } = 8;
     public List<Card> Deck { get; set; } = new List<Card>();
     public static List<Card> FULL_DECK { get; set; } = new List<Card>();

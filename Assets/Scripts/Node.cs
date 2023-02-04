@@ -19,7 +19,7 @@ public class Node
     public int Value { get; }
     public bool IsTerminal
     {
-        get { return !State.CardsInMiddle.Any(); }
+        get { return State.CardsCollectedByAI.Count + State.CardsCollectedByPlayer.Count == 48; }
     }
 
     public Node(StateSpace state, NodeType type)
