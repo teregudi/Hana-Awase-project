@@ -50,8 +50,8 @@ public class MiddleAreaScript : MonoBehaviour
     {
         PlayerScore = GameObject.Find("PlayerScore").GetComponent<Text>();
         AiScore = GameObject.Find("AiScore").GetComponent<Text>();
-        PlayerScore.text = GE.State.PlayerScoreCurrently.ToString();
-        AiScore.text = GE.State.AiScoreCurrently.ToString();
+        PlayerScore.text = GE.State.PlayerScoreCurrently.ToString() + "\nalt: " + GE.State.AlternatePlayerScoreCurrently.ToString();
+        AiScore.text = GE.State.AiScoreCurrently.ToString() + "\nalt: " + GE.State.AlternateAiScoreCurrently.ToString();
 
         if (GE.Phase == Phase.ENDGAME)
         {
@@ -62,6 +62,7 @@ public class MiddleAreaScript : MonoBehaviour
 
         if (GE.Phase == Phase.GAME_OVER)
         {
+            GE.DebugLog();
             Debug.Log("GAME OVER");
         }
     }
@@ -224,6 +225,7 @@ public class MiddleAreaScript : MonoBehaviour
     public void HandleChoiceAfterDraw(GameObject chosenCard)
     {
         DeterminePlaceInCollection(FlippedCard, GE.DrawnCard.Type);
+        Unmark(chosenCard);
         DeterminePlaceInCollection(chosenCard, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(chosenCard.name)).Type);
         MarkedCards.Remove(chosenCard);
         ResetMarkedCards();

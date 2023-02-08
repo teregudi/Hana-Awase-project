@@ -23,6 +23,16 @@ public class StateSpace : ICloneable
         get { return CalculateScore(CardsCollectedByAI); }
     }
 
+    public int AlternatePlayerScoreCurrently
+    {
+        get { return CalculateAlternateScore(CardsCollectedByPlayer, CardsCollectedByAI); }
+    }
+
+    public int AlternateAiScoreCurrently
+    {
+        get { return CalculateAlternateScore(CardsCollectedByAI, CardsCollectedByPlayer); }
+    }
+
     private int CalculateScore(List<Card> cards)
     {
         int score = 0;
@@ -136,6 +146,43 @@ public class StateSpace : ICloneable
         score += april == 4 ? 10 : 0;
         score += november == 4 ? 10 : 0;
         score += december == 4 ? 10 : 0;
+        return score;
+    }
+
+    private int CalculateAlternateScore(List<Card> cards, List<Card> opponentCards)
+    {
+        int score = CalculateScore(cards);
+        score -= 132;
+
+        int opponentScore = 0;
+        List<Card> brightCards = new List<Card>();
+        List<Card> animalCards = new List<Card>();
+        List<Card> ribbonCards = new List<Card>();
+        List<Card> chaffCards = new List<Card>();
+        foreach (var card in opponentCards)
+        {
+            switch (card.Type)
+            {
+                case CardType.BRIGHT:
+                    brightCards.Add(card);
+                    break;
+                case CardType.ANIMAL:
+                    animalCards.Add(card);
+                    break;
+                case CardType.RIBBON:
+                    ribbonCards.Add(card);
+                    break;
+                case CardType.CHAFF:
+                    chaffCards.Add(card);
+                    break;
+            }
+        }
+        opponentScore += CalculateBrightYaku(brightCards, animalCards);
+        opponentScore += CalculateAnimalYaku(animalCards);
+        opponentScore += CalculateRibbonYaku(ribbonCards);
+        opponentScore += CalculateViewingYaku(brightCards, animalCards);
+        opponentScore += CalculateFourOfAKindYaku(cards);
+        score -= opponentScore;
         return score;
     }
 

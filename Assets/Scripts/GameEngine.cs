@@ -14,7 +14,7 @@ public class GameEngine
     public static bool endGameAlreadyStarted = false;
 
     public StateSpace State { get; set; } = new StateSpace();
-    public int Difficulty { get; set; } = 6;
+    public int Difficulty { get; set; } = 20;
     public int NumberOfCards { get; set; } = 8;
     public List<Card> Deck { get; set; } = new List<Card>();
     public static List<Card> FULL_DECK { get; set; } = new List<Card>();
@@ -97,7 +97,7 @@ public class GameEngine
     public void MoveCardFromMiddleToPlayerCollection(GameObject cardObject)
     {
         Card card = State.CardsInMiddle.First(c => c.Id == int.Parse(cardObject.name));
-        var matchingCards = State.CardsInMiddle.Where(c => c.Month == card.Month);
+        var matchingCards = State.CardsInMiddle.Where(c => c.Month == card.Month).ToList();
         if (matchingCards.Count() < 3)
         {
             State.CardsCollectedByPlayer.Add(card);
@@ -162,11 +162,13 @@ public class GameEngine
         {
             StateSpace stateA = (StateSpace)State.Clone();
             stateA.CardsInMiddle.Remove(matchingCards[0]);
+            stateA.CardsCollectedByAI.Add(matchingCards[0]);
             Node nodeA = new Node(stateA, NodeType.MIN);
             int scoreA = Expectiminimax.CalculateNodeValue(nodeA, Difficulty);
 
             StateSpace stateB = (StateSpace)State.Clone();
             stateB.CardsInMiddle.Remove(matchingCards[1]);
+            stateB.CardsCollectedByAI.Add(matchingCards[1]);
             Node nodeB = new Node(stateB, NodeType.MIN);
             int scoreB = Expectiminimax.CalculateNodeValue(nodeB, Difficulty);
 
@@ -216,24 +218,35 @@ public class GameEngine
         return collectedFromMiddle;
     }
 
-    //public void DebugLog()
-    //{
-    //    StringBuilder sb = new StringBuilder();
-    //    sb.Append("Cards at player:\n");
-    //    foreach (var item in State.CardsAtPlayer)
-    //    {
-    //        sb.Append("- " + item);
-    //    }
-    //    sb.Append("\nCards at robot:\n");
-    //    foreach (var item in State.CardsAtAI)
-    //    {
-    //        sb.Append("- " + item);
-    //    }
-    //    sb.Append("\nCards in middle:\n");
-    //    foreach (var item in State.CardsInMiddle)
-    //    {
-    //        sb.Append("- " + item);
-    //    }
-    //    Debug.Log(sb.ToString());
-    //}
+    public void DebugLog()
+    {
+        StringBuilder sb = new StringBuilder();
+        //sb.Append("Cards at player:\n");
+        //foreach (var item in State.CardsAtPlayer)
+        //{
+        //    sb.Append("- " + item);
+        //}
+        //sb.Append("\nCards at robot:\n");
+        //foreach (var item in State.CardsAtAI)
+        //{
+        //    sb.Append("- " + item);
+        //}
+        //sb.Append("\nCards in middle:\n");
+        //foreach (var item in State.CardsInMiddle)
+        //{
+        //    sb.Append("- " + item);
+        //}
+        //Debug.Log(sb.ToString());
+        sb.Append("Cards collected by player: \n");
+        foreach (var card in State.CardsCollectedByPlayer)
+        {
+            sb.Append(card + " - ");
+        }
+        sb.Append("\nCards collected by robot: \n");
+        foreach (var card in State.CardsCollectedByAI)
+        {
+            sb.Append(card + " - ");
+        }
+        Debug.Log(sb.ToString());
+    }
 }

@@ -1,10 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-[DisallowMultipleComponent]
 public class Setup : MonoBehaviour
 {
     public GameObject CardPrefab;
@@ -252,7 +249,8 @@ public class Setup : MonoBehaviour
 
             GameObject opponentCard = Instantiate(CardPrefab, new Vector2(0, 0), Quaternion.identity);
             image = opponentCard.GetComponent<RawImage>();
-            image.texture = BlackBack;
+            image.texture = opponentCards[i].FrontPic;
+            //image.texture = BlackBack;
             opponentCard.name = opponentCards[i].Id.ToString();
             OpponentArea.GetComponent<OpponentAreaScript>().Receive(opponentCard);
         }

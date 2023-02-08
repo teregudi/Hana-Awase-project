@@ -31,6 +31,10 @@ public class OpponentAreaScript : MonoBehaviour
         if (GE.Phase == Phase.AI_TURN_BEGIN)
         {
             GE.Phase = Phase.AI_TURN;
+
+            Debug.Log("na ez itten az állás:");
+            GE.DebugLog();
+            
             HandleAiMoveFromHand();
         }
     }

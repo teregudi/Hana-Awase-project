@@ -1,9 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
-[System.Serializable]
 public class Card
 {
     // lehet hogy ezt a frontpicet nem itt kélne tárolni
