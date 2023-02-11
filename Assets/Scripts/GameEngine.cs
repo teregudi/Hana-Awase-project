@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GameEngine
 {
     private static GameEngine singleton = null;
     private static StateFactory stateFactory = new StateFactory();
     public static bool endGameAlreadyStarted = false;
+    public bool isZeroSum = true;
 
     public StateSpace State { get; set; } = new StateSpace();
     public int Difficulty { get; set; } = 20;

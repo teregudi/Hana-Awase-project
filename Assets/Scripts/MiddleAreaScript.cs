@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,15 +43,12 @@ public class MiddleAreaScript : MonoBehaviour
         opponentAnimalScript = GameObject.Find("OpponentAnimal").GetComponent<OpponentAnimalScript>();
         opponentRibbonScript = GameObject.Find("OpponentRibbon").GetComponent<OpponentRibbonScript>();
         opponentChaffScript = GameObject.Find("OpponentChaff").GetComponent<OpponentChaffScript>();
+        PlayerScore = GameObject.Find("PlayerScore").GetComponent<Text>();
+        AiScore = GameObject.Find("AiScore").GetComponent<Text>();
     }
 
     void Update()
     {
-        PlayerScore = GameObject.Find("PlayerScore").GetComponent<Text>();
-        AiScore = GameObject.Find("AiScore").GetComponent<Text>();
-        PlayerScore.text = GE.State.PlayerScoreCurrently.ToString() + "\nalt: " + GE.State.AlternatePlayerScoreCurrently.ToString();
-        AiScore.text = GE.State.AiScoreCurrently.ToString() + "\nalt: " + GE.State.AlternateAiScoreCurrently.ToString();
-
         if (GE.Phase == Phase.ENDGAME)
         {
             GE.Phase = Phase.PLAYER_MOVE_BLOCKED;
@@ -70,6 +66,21 @@ public class MiddleAreaScript : MonoBehaviour
     public void Receive(GameObject card)
     {
         Cards.Add(card);
+        if (Cards.Count > 12)
+        {
+            GridLayoutGroup glg = GetComponent<GridLayoutGroup>();
+            glg.spacing = new Vector2(0, 40);
+        }
+        //if (Cards.Count > 8)
+        //{
+        //    GameObject p = GameObject.Find("TT Canvas");
+        //    card.transform.SetParent(p.transform, true);
+        //    Transform target = opponentAreaScript.Cards.First().transform;
+        //    card.transform.position = new Vector2(0, 0);
+        //    card.transform.position = Vector3.Lerp(card.transform.position, new Vector3(0, 0), Time.deltaTime * 5);
+        //}
+        //else
+
         card.transform.SetParent(transform, false);
     }
 
@@ -159,6 +170,12 @@ public class MiddleAreaScript : MonoBehaviour
                 else playerChaffScript.Receive(card);
                 break;
         }
+        if (Cards.Count <= 12)
+        {
+            GridLayoutGroup glg = GetComponent<GridLayoutGroup>();
+            glg.spacing = new Vector2(20, 40);
+        }
+        RefreshScore();
     }
 
     public void OnClick()
@@ -230,6 +247,20 @@ public class MiddleAreaScript : MonoBehaviour
         MarkedCards.Remove(chosenCard);
         ResetMarkedCards();
         SetNewDeckPlaceholder();
+    }
+
+    public void RefreshScore()
+    {
+        if (GE.isZeroSum)
+        {
+            PlayerScore.text = "Player score:\n" + GE.State.GetPlayerZeroSumScore().ToString();
+            AiScore.text = "Opponent score:\n" + GE.State.GetAiZeroSumScore().ToString();
+        }
+        else
+        {
+            PlayerScore.text = "Player score:\n" + GE.State.GetPlayerAdditiveScore().ToString();
+            AiScore.text = "Opponent score:\n" + GE.State.GetAiAdditiveScore().ToString();
+        }
     }
 
     private void SetNewDeckPlaceholder()

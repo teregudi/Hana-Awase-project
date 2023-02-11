@@ -220,7 +220,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6370927151551425091, guid: 415646cc652f9364d824b06b33527276, type: 3}
       propertyPath: m_Spacing.x
-      value: -10
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6370927151551425091, guid: 415646cc652f9364d824b06b33527276, type: 3}
       propertyPath: m_Spacing.y
@@ -345,7 +345,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8826881925379120685, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
       propertyPath: m_Spacing.x
-      value: -25
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8826881925379120685, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
       propertyPath: m_Spacing.y
@@ -492,8 +492,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 764.4181, y: -415.26666}
-  m_SizeDelta: {x: 305.6791, y: 168.6657}
+  m_AnchoredPosition: {x: 770, y: -438.75}
+  m_SizeDelta: {x: 380, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &553869507
 MonoBehaviour:
@@ -517,18 +517,18 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 60
+    m_FontSize: 45
     m_FontStyle: 1
     m_BestFit: 0
-    m_MinSize: 4
+    m_MinSize: 0
     m_MaxSize: 60
-    m_Alignment: 0
+    m_Alignment: 1
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: score
+  m_Text: 'Player score:'
 --- !u!222 &553869508
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1147,7 +1147,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4723103627044868035, guid: 9219c6bb9551b2c428667ff6b77a2fd4, type: 3}
       propertyPath: m_Spacing.x
-      value: -10
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4723103627044868035, guid: 9219c6bb9551b2c428667ff6b77a2fd4, type: 3}
       propertyPath: m_Spacing.y
@@ -1306,8 +1306,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -725, y: 390.92126}
-  m_SizeDelta: {x: 305.6791, y: 158.524}
+  m_AnchoredPosition: {x: -760, y: 388.74}
+  m_SizeDelta: {x: 380, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2146288117
 MonoBehaviour:
@@ -1331,18 +1331,18 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 60
+    m_FontSize: 45
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 4
     m_MaxSize: 60
-    m_Alignment: 0
+    m_Alignment: 1
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: score
+  m_Text: 'Opponent score:'
 --- !u!222 &2146288118
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1762,34 +1762,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8826881925379120685, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
-      propertyPath: m_Spacing.x
-      value: -25
-      objectReference: {fileID: 0}
-    - target: {fileID: 8826881925379120685, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
-      propertyPath: m_Spacing.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8826881925379120685, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
-      propertyPath: m_StartAxis
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8826881925379120685, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
-      propertyPath: m_CellSize.x
-      value: 55.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 8826881925379120685, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
-      propertyPath: m_CellSize.y
-      value: 93
-      objectReference: {fileID: 0}
-    - target: {fileID: 8826881925379120685, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
-      propertyPath: m_ChildAlignment
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8826881925379120685, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
-      propertyPath: m_ConstraintCount
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
 --- !u!1001 &5826552304510729221
@@ -2185,7 +2157,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6370927151551425091, guid: 415646cc652f9364d824b06b33527276, type: 3}
       propertyPath: m_Spacing.x
-      value: -10
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6370927151551425091, guid: 415646cc652f9364d824b06b33527276, type: 3}
       propertyPath: m_Spacing.y
@@ -2310,7 +2282,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4723103627044868035, guid: 9219c6bb9551b2c428667ff6b77a2fd4, type: 3}
       propertyPath: m_Spacing.x
-      value: -10
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4723103627044868035, guid: 9219c6bb9551b2c428667ff6b77a2fd4, type: 3}
       propertyPath: m_Spacing.y

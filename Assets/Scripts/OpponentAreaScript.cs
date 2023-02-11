@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,9 +30,6 @@ public class OpponentAreaScript : MonoBehaviour
         if (GE.Phase == Phase.AI_TURN_BEGIN)
         {
             GE.Phase = Phase.AI_TURN;
-
-            Debug.Log("na ez itten az állás:");
-            GE.DebugLog();
             
             HandleAiMoveFromHand();
         }
@@ -129,5 +125,6 @@ public class OpponentAreaScript : MonoBehaviour
                 opponentChaffScript.Receive(card);
                 break;
         }
+        middleAreaScript.RefreshScore();
     }
 }

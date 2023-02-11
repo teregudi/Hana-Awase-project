@@ -1,11 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public class StateSpace : ICloneable
 {
+    private static GameEngine GE = GameEngine.getGE();
+
     public List<Card> CardsAtPlayer { get; set; } = new List<Card>();
     public List<Card> CardsAtAI { get; set; } = new List<Card>();
     public List<Card> CardsInMiddle { get; set; } = new List<Card>();
@@ -13,29 +13,33 @@ public class StateSpace : ICloneable
     public List<Card> CardsCollectedByAI { get; set; } = new List<Card>();
     public float Probability { get; set; } = 1;
 
-    public int PlayerScoreCurrently
+    public int GetPlayerAdditiveScore()
     {
-        get { return CalculateScore(CardsCollectedByPlayer); }
+        return CalculateAdditiveScore(CardsCollectedByPlayer);
     }
 
-    public int AiScoreCurrently
+    public int GetAiAdditiveScore()
     {
-        get { return CalculateScore(CardsCollectedByAI); }
+        return PointsForCapturedCards(CardsCollectedByAI) + PointsForYakus(CardsCollectedByAI);
     }
 
-    public int AlternatePlayerScoreCurrently
+    public int GetPlayerZeroSumScore()
     {
-        get { return CalculateAlternateScore(CardsCollectedByPlayer, CardsCollectedByAI); }
+        return CalculateAdditiveScore(CardsCollectedByPlayer) - PointsForYakus(CardsCollectedByAI) - 132;
     }
 
-    public int AlternateAiScoreCurrently
+    public int GetAiZeroSumScore()
     {
-        get { return CalculateAlternateScore(CardsCollectedByAI, CardsCollectedByPlayer); }
+        return CalculateAdditiveScore(CardsCollectedByAI) - PointsForYakus(CardsCollectedByPlayer) - 132;
     }
 
-    private int CalculateScore(List<Card> cards)
+    private int CalculateAdditiveScore(List<Card> cards)
     {
-        int score = 0;
+        return PointsForCapturedCards(cards) + PointsForYakus(cards);
+    }
+
+    private int PointsForCapturedCards(List<Card> cards)
+    {
         List<Card> brightCards = new List<Card>();
         List<Card> animalCards = new List<Card>();
         List<Card> ribbonCards = new List<Card>();
@@ -58,15 +62,38 @@ public class StateSpace : ICloneable
                     break;
             }
         }
-        score += (brightCards.Count * 20) + (animalCards.Count * 10) + (ribbonCards.Count * 5) + chaffCards.Count;
+        return (brightCards.Count * 20) + (animalCards.Count * 10) + (ribbonCards.Count * 5) + chaffCards.Count;
+    }
 
-        score += CalculateBrightYaku(brightCards, animalCards);
-        score += CalculateAnimalYaku(animalCards);
-        score += CalculateRibbonYaku(ribbonCards);
-        score += CalculateViewingYaku(brightCards, animalCards);
-        score += CalculateFourOfAKindYaku(cards);
-
-        return score;
+    private int PointsForYakus(List<Card> cards)
+    {
+        List<Card> brightCards = new List<Card>();
+        List<Card> animalCards = new List<Card>();
+        List<Card> ribbonCards = new List<Card>();
+        List<Card> chaffCards = new List<Card>();
+        foreach (var card in cards)
+        {
+            switch (card.Type)
+            {
+                case CardType.BRIGHT:
+                    brightCards.Add(card);
+                    break;
+                case CardType.ANIMAL:
+                    animalCards.Add(card);
+                    break;
+                case CardType.RIBBON:
+                    ribbonCards.Add(card);
+                    break;
+                case CardType.CHAFF:
+                    chaffCards.Add(card);
+                    break;
+            }
+        }
+        return CalculateBrightYaku(brightCards, animalCards)
+            + CalculateAnimalYaku(animalCards)
+            + CalculateRibbonYaku(ribbonCards)
+            + CalculateViewingYaku(brightCards, animalCards)
+            + CalculateFourOfAKindYaku(cards);
     }
 
     private int CalculateBrightYaku(List<Card> brights, List<Card> animals)
@@ -146,43 +173,6 @@ public class StateSpace : ICloneable
         score += april == 4 ? 10 : 0;
         score += november == 4 ? 10 : 0;
         score += december == 4 ? 10 : 0;
-        return score;
-    }
-
-    private int CalculateAlternateScore(List<Card> cards, List<Card> opponentCards)
-    {
-        int score = CalculateScore(cards);
-        score -= 132;
-
-        int opponentScore = 0;
-        List<Card> brightCards = new List<Card>();
-        List<Card> animalCards = new List<Card>();
-        List<Card> ribbonCards = new List<Card>();
-        List<Card> chaffCards = new List<Card>();
-        foreach (var card in opponentCards)
-        {
-            switch (card.Type)
-            {
-                case CardType.BRIGHT:
-                    brightCards.Add(card);
-                    break;
-                case CardType.ANIMAL:
-                    animalCards.Add(card);
-                    break;
-                case CardType.RIBBON:
-                    ribbonCards.Add(card);
-                    break;
-                case CardType.CHAFF:
-                    chaffCards.Add(card);
-                    break;
-            }
-        }
-        opponentScore += CalculateBrightYaku(brightCards, animalCards);
-        opponentScore += CalculateAnimalYaku(animalCards);
-        opponentScore += CalculateRibbonYaku(ribbonCards);
-        opponentScore += CalculateViewingYaku(brightCards, animalCards);
-        opponentScore += CalculateFourOfAKindYaku(cards);
-        score -= opponentScore;
         return score;
     }
 

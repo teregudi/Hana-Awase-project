@@ -1,10 +1,12 @@
 using Assets.Scripts;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public class Node
 {
     private static StateFactory stateFactory = new StateFactory();
-    private static Dictionary<NodeType, NodeType> nodes = new Dictionary<NodeType, NodeType>()
+    private static Dictionary<NodeType, NodeType> whichNodeTypeNext = new Dictionary<NodeType, NodeType>()
     {
         { NodeType.MAX, NodeType.CHANCE_AFTER_MAX },
         { NodeType.MIN, NodeType.CHANCE_AFTER_MIN },
@@ -14,16 +16,15 @@ public class Node
     public StateSpace State { get; }
     public NodeType Type { get; }
     public int Value { get; }
-    public bool IsTerminal
-    {
-        get { return State.CardsCollectedByAI.Count + State.CardsCollectedByPlayer.Count == 48; }
-    }
+    public bool IsTerminal { get; }
 
     public Node(StateSpace state, NodeType type)
     {
         State = state;
         Type = type;
         Value = CalculateValue();
+        // ha már kijátszottak minden lapot, felesleges tovább számolgatni
+        IsTerminal = !State.CardsAtAI.Any() && State.CardsAtPlayer.Any();
     }
 
     public List<Node> GetChildNodes()
@@ -34,15 +35,15 @@ public class Node
         List<StateSpace> states = stateFactory.CreatePossibleStates();
         foreach (var state in states)
         {
-            children.Add(new Node(state, nodes[Type]));
+            children.Add(new Node(state, whichNodeTypeNext[Type]));
         } 
         return children;
     }
 
     private int CalculateValue()
     {
-        int playerScore = State.PlayerScoreCurrently;
-        int aiScore = State.AiScoreCurrently;
+        int playerScore = State.GetPlayerAdditiveScore();
+        int aiScore = State.GetAiAdditiveScore();
         return aiScore - playerScore;
     }
 }

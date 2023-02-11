@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -114,7 +111,7 @@ namespace Assets.Scripts
                 }
             }
             // egy kis trükközés, talán beválik
-            return states.OrderByDescending(s => s.PlayerScoreCurrently).Take(3).ToList();
+            return states.OrderByDescending(s => s.GetPlayerAdditiveScore()).Take(3).ToList();
         }
 
         private List<StateSpace> CreateStatesByDrawingFromDeck()
@@ -273,9 +270,9 @@ namespace Assets.Scripts
                     StateSpace clone = (StateSpace)InitialState.Clone();
                     clone.CardsCollectedByPlayer.Add(unknownCard);
                     clone.CardsCollectedByPlayer.AddRange(matchingCards);
-                    if (clone.PlayerScoreCurrently > maxValue)
+                    if (clone.GetPlayerAdditiveScore() > maxValue)
                     {
-                        maxValue = clone.PlayerScoreCurrently;
+                        maxValue = clone.GetPlayerAdditiveScore();
                         cardToPlay = unknownCard;
                         matches = matchingCards.ToList();
                     }
@@ -287,9 +284,9 @@ namespace Assets.Scripts
                         StateSpace clone = (StateSpace)InitialState.Clone();
                         clone.CardsCollectedByPlayer.Add(unknownCard);
                         clone.CardsCollectedByPlayer.Add(matchingCard);
-                        if (clone.PlayerScoreCurrently > maxValue)
+                        if (clone.GetPlayerAdditiveScore() > maxValue)
                         {
-                            maxValue = clone.PlayerScoreCurrently;
+                            maxValue = clone.GetPlayerAdditiveScore();
                             cardToPlay = unknownCard;
                             matches = new List<Card> { matchingCard };
                         }

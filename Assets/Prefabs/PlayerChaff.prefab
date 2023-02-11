@@ -94,10 +94,10 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 4
+  m_ChildAlignment: 3
   m_StartCorner: 2
-  m_StartAxis: 1
-  m_CellSize: {x: 111.6, y: 186}
-  m_Spacing: {x: 40, y: 40}
+  m_StartAxis: 0
+  m_CellSize: {x: 55.8, y: 93}
+  m_Spacing: {x: 10, y: 0}
   m_Constraint: 2
-  m_ConstraintCount: 2
+  m_ConstraintCount: 1
