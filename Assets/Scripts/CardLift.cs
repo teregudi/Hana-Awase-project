@@ -13,7 +13,7 @@ public class CardLift : MonoBehaviour
 
     private void Start()
     {
-        GLS = GameEngine.getGE();
+        GLS = GameEngine.GetGameEngine();
     }
 
     public void OnHoverEnter()
@@ -36,7 +36,7 @@ public class CardLift : MonoBehaviour
     private bool IsItOkay()
     {
         int thisMonth = Int32.Parse(this.name) / 10;
-        foreach (Card card in GLS.State.CardsInMiddle)
+        foreach (Card card in GLS.currentState.CardsInMiddle)
         {
             if (card.Id / 10 == thisMonth)
             {

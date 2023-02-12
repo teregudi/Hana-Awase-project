@@ -42,8 +42,8 @@ public class Node
 
     private int CalculateValue()
     {
-        int playerScore = State.GetPlayerAdditiveScore();
-        int aiScore = State.GetAiAdditiveScore();
+        int playerScore = State.GetPlayerScore();
+        int aiScore = State.GetAiScore();
         return aiScore - playerScore;
     }
 }

@@ -846,7 +846,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb19cac1797b54d498ad1221624f6b09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cards: []
 --- !u!1 &1269684596 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1830923077321756501, guid: e978b4d5828ce1b4eaa558dcfdb2a956, type: 3}
@@ -869,6 +868,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da3cc569bf1aae842b9d34d9704c60ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cards: []
 --- !u!224 &1318014303 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4057997764950190231, guid: 415646cc652f9364d824b06b33527276, type: 3}
@@ -896,11 +896,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5c32ecf6994cef48bd2b1fbab7b743b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  middleAreaScript: {fileID: 0}
-  playerBrightScript: {fileID: 0}
-  playerAnimalScript: {fileID: 0}
-  playerRibbonScript: {fileID: 0}
-  playerChaffScript: {fileID: 0}
+  cards: []
+  markedCard: {fileID: 0}
 --- !u!1 &1568363836 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4057997764950190230, guid: 415646cc652f9364d824b06b33527276, type: 3}
@@ -918,7 +915,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b665d2d6400800d43be7bfa9f38f117d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cards: []
 --- !u!224 &1641630608 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1893079003875220729, guid: d9acdefed3ebfab448a26b146a22d0d3, type: 3}
@@ -936,7 +932,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2495bf2955214446a3377f5b57dd34d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cards: []
 --- !u!1001 &1647731840
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1202,7 +1197,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8976ee2517bdeb54482fe7c4aea2e87c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cards: []
 --- !u!1 &2020393168
 GameObject:
   m_ObjectHideFlags: 0
@@ -1995,7 +1989,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d78f4f3f66da3440b2077ef1ba33014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cards: []
 --- !u!224 &6154747631548899479 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2427764225820331287, guid: 9219c6bb9551b2c428667ff6b77a2fd4, type: 3}
@@ -2013,7 +2006,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef7a5409acb2e1e41a99e0dbe2e711f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cards: []
 --- !u!224 &6154747632845058906 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 411547407201832799, guid: 13b4dab7d1ddef04faf856317ad75e41, type: 3}
@@ -2031,7 +2023,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9562279fcc48c44ea0baccd76b3dd1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cards: []
 --- !u!1 &6154747633126154652 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2343216856615373489, guid: 134a25c962d823642bc3143926eb2376, type: 3}
@@ -2059,7 +2050,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 925f12043e6b43743aaa20dcc20f1c6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cards: []
 --- !u!1001 &7870859671661335059
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2476,5 +2466,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blackBack: {fileID: 2800000, guid: 53a2c33a343f9934ca899964c846e005, type: 3}
   cardPrefab: {fileID: 8101078277246865026, guid: b028b6425966e5046b75da7cece742b5, type: 3}
-  PlayerScore: {fileID: 553869507}
-  AiScore: {fileID: 2146288117}
+  gameOverPrefab: {fileID: 6432644880052453714, guid: cbf010e693ea17f46b8d7af5b7805462, type: 3}
+  playerScore: {fileID: 0}
+  aiScore: {fileID: 0}
+  cards: []
+  markedCards: []
+  flippedCard: {fileID: 0}

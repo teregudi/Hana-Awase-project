@@ -18,7 +18,7 @@ public class DragDrop : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        GLS = GameEngine.getGE();
+        GLS = GameEngine.GetGameEngine();
     }
 
     private void Awake()

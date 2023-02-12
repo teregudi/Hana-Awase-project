@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class SceneLoader : MonoBehaviour
 {
-    private GameEngine GE = GameEngine.getGE();
     Dropdown dropdown;
     ToggleGroup toggleGroup;
 
@@ -24,21 +23,15 @@ public class SceneLoader : MonoBehaviour
     {
         switch (dropdownValue)
         {
-            case 0: GE.Difficulty = 3; break;
-            case 1: GE.Difficulty = 10; break;
-            case 2: GE.Difficulty = 20; break;
+            case 0: GameEngine.difficulty = 0; break;
+            case 1: GameEngine.difficulty = 5; break;
+            case 2: GameEngine.difficulty = 9; break;
         }
     }
 
     private void SetScoring(string option)
     {
-        if (option == "zero-sum")
-        {
-            GE.isZeroSum = true;
-        }
-        else
-        {
-            GE.isZeroSum = false;
-        }
+        if (option == "zero-sum") GameEngine.isZeroSum = true;
+        else GameEngine.isZeroSum = false;
     }
 }

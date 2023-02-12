@@ -18,7 +18,6 @@ namespace Assets.Scripts
                 case NodeType.MIN:
                     return CreateStatesForPlayer();
                 case NodeType.CHANCE_AFTER_MAX:
-                    return CreateStatesByDrawingFromDeck();
                 case NodeType.CHANCE_AFTER_MIN:
                     return CreateStatesByDrawingFromDeck();
                 default:
@@ -43,26 +42,24 @@ namespace Assets.Scripts
                 if (cardsAndTheirMatches.Count == 1)
                 {
                     // persze külön kell kezelni azt az esetet, ha középről csak 1-et vagy 3-at tud elvinni, vagy még választania is kell 2 közül
-                    Debug.Log("1. Ezt játsza ki: " + cardsAndTheirMatches.First());
                     return CalculateStatesAccordingToMatches(cardsAndTheirMatches.First());
                 }
                 // kivesszük a listából azokat, amiket egyébként is csak az AI tudna begyűjteni, mert az ráér később is
                 TruncateDictionaryForVariousReasons(cardsAndTheirMatches);
                 if (cardsAndTheirMatches.Count == 1)
                 {
-                    Debug.Log("2. Ezt játsza ki: " + cardsAndTheirMatches.First());
                     return CalculateStatesAccordingToMatches(cardsAndTheirMatches.First());
                 }
                 // ha még így is több lehetőség van, akkor mindet sorra vesszük
                 foreach (var cardAndMatch in cardsAndTheirMatches)
                 {
-                    Debug.Log("3. Ezt játsza ki: " + cardAndMatch);
                     states.AddRange(CalculateStatesAccordingToMatches(cardAndMatch));
                 }
-                return states;
+                // de azért megkurtítjuk ezt a listát is
+                return states.OrderByDescending(s => s.GetAiScore()).Take(3).ToList();
             }
             // ha nincs match, akkor jöhet a dobás, de az értékes lapokat lehetőleg megtartjuk
-            List<Card> cardsToDrop = SelectLessValuableCardsToDrop(InitialState.CardsAtAI);
+            var cardsToDrop = SelectLessValuableCardsToDrop(InitialState.CardsAtAI);
             foreach (var cardToDrop in cardsToDrop)
             {
                 StateSpace clone = (StateSpace)InitialState.Clone();
@@ -70,7 +67,7 @@ namespace Assets.Scripts
                 clone.CardsInMiddle.Add(cardToDrop);
                 states.Add(clone);
             }
-            return states;
+            return states.OrderByDescending(s => s.GetAiScore()).Take(3).ToList();
         }
 
         private List<StateSpace> CreateStatesForPlayer()
@@ -83,6 +80,7 @@ namespace Assets.Scripts
             // mivel MIN ágon úgyis a legrosszabb eshetőséget vesszük,
             // ezért csak azokat az eseteket vizsgáljuk, ahol a player el tud vinni valamit középről
             var playableCards = allUnknownCards.Where(u => InitialState.CardsInMiddle.Any(m => m.Month == u.Month));
+            //var playableCards = allUnknownCards;
 
             List<StateSpace> states = new List<StateSpace>();
             foreach (var cardFromPlayerHand in playableCards)
@@ -111,7 +109,10 @@ namespace Assets.Scripts
                 }
             }
             // egy kis trükközés, talán beválik
-            return states.OrderByDescending(s => s.GetPlayerAdditiveScore()).Take(3).ToList();
+            return states.OrderByDescending(s => s.GetPlayerScore()).Take(2).ToList();
+            //var states2 = states.OrderByDescending(s => s.GetPlayerScore()).Take(1).ToList();
+            //states2.Add(states.OrderBy(s => s.GetPlayerScore()).First());
+            //return states2;
         }
 
         private List<StateSpace> CreateStatesByDrawingFromDeck()
@@ -121,28 +122,30 @@ namespace Assets.Scripts
 
             if (NodeType == NodeType.CHANCE_AFTER_MAX)
             {
-                Card cardToDrop = CalculateLessFavourableCardForAi();
-                clone.CardsInMiddle.Add(cardToDrop);
-                states.Add(clone);
-                return states;
+                //Card cardToDrop = CalculateLessFavourableCardForAi();
+                //clone.CardsInMiddle.Add(cardToDrop);
+                //states.Add(clone);
+                //return states;
+                return CalculateRandomChanceStates(4);
             }
 
             if (NodeType == NodeType.CHANCE_AFTER_MIN)
             {
-                (Card, List<Card>) cardAndMatches = CalculateMostFavourableCardForPlayer();
-                if (cardAndMatches == (null, null))
-                {
-                    states.Add(clone);
-                    return states;
-                }
-                clone.CardsCollectedByPlayer.Add(cardAndMatches.Item1);
-                clone.CardsCollectedByPlayer.AddRange(cardAndMatches.Item2);
-                foreach (var match in cardAndMatches.Item2)
-                {
-                    clone.CardsInMiddle.Remove(match);
-                }
-                states.Add(clone);
-                return states;
+                //(Card, List<Card>) cardAndMatches = CalculateMostFavourableCardForPlayer();
+                //if (cardAndMatches == (null, null))
+                //{
+                //    states.Add(clone);
+                //    return states;
+                //}
+                //clone.CardsCollectedByPlayer.Add(cardAndMatches.Item1);
+                //clone.CardsCollectedByPlayer.AddRange(cardAndMatches.Item2);
+                //foreach (var match in cardAndMatches.Item2)
+                //{
+                //    clone.CardsInMiddle.Remove(match);
+                //}
+                //states.Add(clone);
+                //return states;
+                return CalculateRandomChanceStates(4);
             }
 
             states.Add(clone);
@@ -222,12 +225,8 @@ namespace Assets.Scripts
             }
         }
 
-        private List<Card> SelectLessValuableCardsToDrop(List<Card> cards)
+        private IEnumerable<Card> SelectLessValuableCardsToDrop(List<Card> cards)
         {
-            // itt lehetne az, hogy sorra vesszük a lapjainkat, egyesével hozzáadjuk azt a player collectionhöz,
-            // és azt a lapot dobjuk ki, amivel a legkevesebb nyereséget okozzuk a playernek
-
-            // először megnézzük, van-e olyan pár a kézben, aminek a másik két lapja már be van gyűjtve
             foreach (var item in cards)
             {
                 if (cards.Where(c => c.Month == item.Month).Count() == 2 &&
@@ -237,14 +236,80 @@ namespace Assets.Scripts
                     return new List<Card> { item };
                 }
             }
-            List<Card> lessValuableCards = new List<Card>();
+            // nem biztos hogy jó ötlet ez a szűrés, de egyelőre maradhat
             var cardsMinusBrights = cards.Where(c => c.Type != CardType.BRIGHT);
             if (!cardsMinusBrights.Any()) return cards;
             var cardsMinusAnimals = cardsMinusBrights.Where(c => c.Type != CardType.ANIMAL);
-            if (!cardsMinusAnimals.Any()) return cardsMinusBrights.ToList();
+            if (!cardsMinusAnimals.Any()) return cardsMinusBrights;
             var cardsMinusRibbons = cardsMinusAnimals.Where(c => c.Type != CardType.RIBBON);
-            if (!cardsMinusRibbons.Any()) return cardsMinusAnimals.ToList();
-            return cardsMinusRibbons.ToList();
+            if (!cardsMinusRibbons.Any()) return cardsMinusAnimals;
+            return cardsMinusRibbons;
+        }
+
+        private List<StateSpace> CalculateRandomChanceStates(int howmany)
+        {
+            List<StateSpace> randomStates = new List<StateSpace>();
+            var unknownCards = GetAllUnknownCards();
+            int[] ints = new int[howmany];
+            ints[0] = Random.Range(0, unknownCards.Count());
+            for (int i = 1; i < howmany; i++)
+            {
+                int z;
+                do
+                {
+                    z = Random.Range(0, unknownCards.Count());
+                } while (ints.Contains(z));
+                ints[i] = z;
+            }
+            foreach (var index in ints)
+            {
+                StateSpace clone = (StateSpace)InitialState.Clone();
+                var flippedCard = unknownCards.ElementAt(index);
+                var matchingCards = InitialState.CardsInMiddle.Where(c => c.Month == flippedCard.Month);
+                if (!matchingCards.Any())
+                {
+                    clone.CardsInMiddle.Add(flippedCard);
+                    //clone.Probability = 1 / howmany;
+                    randomStates.Add(clone);
+                }
+                else if (matchingCards.Count() == 1 || matchingCards.Count() == 3)
+                {
+                    clone.CardsInMiddle.RemoveAll(c => c.Month == flippedCard.Month);
+                    if (NodeType == NodeType.CHANCE_AFTER_MAX)
+                    {
+                        clone.CardsCollectedByAI.Add(flippedCard);
+                        clone.CardsCollectedByAI.AddRange(matchingCards);
+                    }
+                    else
+                    {
+                        clone.CardsCollectedByPlayer.Add(flippedCard);
+                        clone.CardsCollectedByPlayer.AddRange(matchingCards);
+                    }
+                    //clone.Probability = 1 / howmany;
+                    randomStates.Add(clone);
+                }
+                else
+                {
+                    foreach (var matchingCard in matchingCards)
+                    {
+                        StateSpace matchClone = (StateSpace)InitialState.Clone();
+                        matchClone.CardsInMiddle.Remove(matchingCard);
+                        if (NodeType == NodeType.CHANCE_AFTER_MAX)
+                        {
+                            matchClone.CardsCollectedByAI.Add(flippedCard);
+                            matchClone.CardsCollectedByAI.Add(matchingCard);
+                        }
+                        else
+                        {
+                            matchClone.CardsCollectedByPlayer.Add(flippedCard);
+                            matchClone.CardsCollectedByPlayer.Add(matchingCard);
+                        }
+                        //matchClone.Probability = 1 / howmany;
+                        randomStates.Add(matchClone);
+                    }
+                }
+            }
+            return randomStates;
         }
 
         private (Card, List<Card>) CalculateMostFavourableCardForPlayer()
@@ -270,9 +335,9 @@ namespace Assets.Scripts
                     StateSpace clone = (StateSpace)InitialState.Clone();
                     clone.CardsCollectedByPlayer.Add(unknownCard);
                     clone.CardsCollectedByPlayer.AddRange(matchingCards);
-                    if (clone.GetPlayerAdditiveScore() > maxValue)
+                    if (clone.GetPlayerScore() > maxValue)
                     {
-                        maxValue = clone.GetPlayerAdditiveScore();
+                        maxValue = clone.GetPlayerScore();
                         cardToPlay = unknownCard;
                         matches = matchingCards.ToList();
                     }
@@ -284,9 +349,9 @@ namespace Assets.Scripts
                         StateSpace clone = (StateSpace)InitialState.Clone();
                         clone.CardsCollectedByPlayer.Add(unknownCard);
                         clone.CardsCollectedByPlayer.Add(matchingCard);
-                        if (clone.GetPlayerAdditiveScore() > maxValue)
+                        if (clone.GetPlayerScore() > maxValue)
                         {
-                            maxValue = clone.GetPlayerAdditiveScore();
+                            maxValue = clone.GetPlayerScore();
                             cardToPlay = unknownCard;
                             matches = new List<Card> { matchingCard };
                         }

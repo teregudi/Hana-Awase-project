@@ -33,7 +33,7 @@ public static class Expectiminimax
         float expectedValue = 0;
         foreach (Node child in node.GetChildNodes())
         {
-            expectedValue += CalculateNodeValue(child, depth - 1) * node.State.Probability;
+            expectedValue += CalculateNodeValue(child, depth - 1) * child.State.Probability;
         }
         return (int)expectedValue;
     }

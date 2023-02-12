@@ -5,19 +5,17 @@ using UnityEngine.UI;
 
 public class PlayerAreaScript : MonoBehaviour
 {
-    public GameEngine GE;
-    public MiddleAreaScript middleAreaScript;
-    public PlayerBrightScript playerBrightScript;
-    public PlayerAnimalScript playerAnimalScript;
-    public PlayerRibbonScript playerRibbonScript;
-    public PlayerChaffScript playerChaffScript;
+    private MiddleAreaScript middleAreaScript;
+    private PlayerBrightScript playerBrightScript;
+    private PlayerAnimalScript playerAnimalScript;
+    private PlayerRibbonScript playerRibbonScript;
+    private PlayerChaffScript playerChaffScript;
 
-    public List<GameObject> Cards { get; set; } = new List<GameObject>();
-    public GameObject MarkedCard { get; set; } = null;
+    public List<GameObject> cards = new List<GameObject>();
+    public GameObject markedCard = null;
 
     void Start()
     {
-        GE = GameEngine.getGE();
         middleAreaScript = GameObject.Find("MiddleArea").GetComponent<MiddleAreaScript>();
         playerBrightScript = GameObject.Find("PlayerBright").GetComponent<PlayerBrightScript>();
         playerAnimalScript = GameObject.Find("PlayerAnimal").GetComponent<PlayerAnimalScript>();
@@ -27,63 +25,63 @@ public class PlayerAreaScript : MonoBehaviour
 
     public void Receive(GameObject card)
     {
-        Cards.Add(card);
+        cards.Add(card);
         card.transform.SetParent(transform, false);
     }
 
     public void MarkCardInHand(GameObject card)
     {
-        if (MarkedCard != null)
+        if (markedCard != null)
         {
             UnmarkMarkedCard();
-            Cards.Add(MarkedCard);
-            MarkedCard = null;
+            cards.Add(markedCard);
+            markedCard = null;
             middleAreaScript.ResetMarkedCards();
         }
-        Cards.Remove(card);
-        MarkedCard = card;
+        cards.Remove(card);
+        markedCard = card;
         RawImage image = card.transform.GetComponent<RawImage>();
-        image.texture = GE.RED_DECK.First(c => c.Id == int.Parse(card.transform.name)).FrontPic;
+        image.texture = GameEngine.RED_DECK.First(c => c.Id == int.Parse(card.transform.name)).FrontPic;
         middleAreaScript.FindAndMarkPossibleMatches(card.name);
     }
 
     public void PassToMiddle()
     {
         UnmarkMarkedCard();
-        middleAreaScript.Receive(MarkedCard);
-        MarkedCard = null;
-    }
-
-    private void UnmarkMarkedCard()
-    {
-        RawImage image = MarkedCard.GetComponent<RawImage>();
-        image.texture = GameEngine.FULL_DECK.First(c => c.Id == int.Parse(MarkedCard.name)).FrontPic;
+        middleAreaScript.Receive(markedCard);
+        markedCard = null;
     }
 
     public void PassToCollection()
     {
         UnmarkMarkedCard();
-        SelectPlaceForCard();
+        SelectRowInCollection();
     }
 
-    private void SelectPlaceForCard()
+    private void UnmarkMarkedCard()
     {
-        switch (GameEngine.FULL_DECK.First(c => c.Id == int.Parse(MarkedCard.name)).Type)
+        RawImage image = markedCard.GetComponent<RawImage>();
+        image.texture = GameEngine.FULL_DECK.First(c => c.Id == int.Parse(markedCard.name)).FrontPic;
+    }    
+
+    private void SelectRowInCollection()
+    {
+        switch (GameEngine.FULL_DECK.First(c => c.Id == int.Parse(markedCard.name)).Type)
         {
             case CardType.BRIGHT:
-                playerBrightScript.Receive(MarkedCard);
+                playerBrightScript.Receive(markedCard);
                 break;
             case CardType.ANIMAL:
-                playerAnimalScript.Receive(MarkedCard);
+                playerAnimalScript.Receive(markedCard);
                 break;
             case CardType.RIBBON:
-                playerRibbonScript.Receive(MarkedCard);
+                playerRibbonScript.Receive(markedCard);
                 break;
             case CardType.CHAFF:
-                playerChaffScript.Receive(MarkedCard);
+                playerChaffScript.Receive(markedCard);
                 break;
         }
-        MarkedCard = null;
+        markedCard = null;
         middleAreaScript.RefreshScore();
     }
 }

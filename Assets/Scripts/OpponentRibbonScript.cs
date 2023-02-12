@@ -9,10 +9,15 @@ public class OpponentRibbonScript : MonoBehaviour
     public void Receive(GameObject card)
     {
         cards.Add(card);
-        if (cards.Count > 6)
+        if (cards.Count > 6 && cards.Count <= 9)
         {
             GridLayoutGroup glg = GetComponent<GridLayoutGroup>();
             glg.spacing = new Vector2(-10, 0);
+        }
+        else if (cards.Count > 9)
+        {
+            GridLayoutGroup glg = GetComponent<GridLayoutGroup>();
+            glg.spacing = new Vector2(-30, 0);
         }
         card.transform.SetParent(transform, false);
     }

@@ -13,11 +13,11 @@ public class OpponentAreaScript : MonoBehaviour
     private OpponentRibbonScript opponentRibbonScript;
     private OpponentChaffScript opponentChaffScript;
 
-    public List<GameObject> Cards { get; set; } = new List<GameObject>();
+    public List<GameObject> cards = new List<GameObject>();
 
     void Start()
     {
-        GE = GameEngine.getGE();
+        GE = GameEngine.GetGameEngine();
         middleAreaScript = GameObject.Find("MiddleArea").GetComponent<MiddleAreaScript>();
         opponentBrightScript = GameObject.Find("OpponentBright").GetComponent<OpponentBrightScript>();
         opponentAnimalScript = GameObject.Find("OpponentAnimal").GetComponent<OpponentAnimalScript>();
@@ -27,9 +27,9 @@ public class OpponentAreaScript : MonoBehaviour
 
     void Update()
     {
-        if (GE.Phase == Phase.AI_TURN_BEGIN)
+        if (GE.currentPhase == Phase.AI_TURN_BEGIN)
         {
-            GE.Phase = Phase.AI_TURN;
+            GE.currentPhase = Phase.AI_TURN;
             
             HandleAiMoveFromHand();
         }
@@ -37,62 +37,66 @@ public class OpponentAreaScript : MonoBehaviour
 
     public void Receive(GameObject card)
     {
-        Cards.Add(card);
+        cards.Add(card);
         card.transform.SetParent(transform, false);
     }
 
     public async void HandleAiMoveFromHand()
     {
-        await Task.Delay(1000);
-        var collectedFromMiddle = GE.CalculateAiMoveFromHand();
-        GameObject playedCard = null;
-        foreach (var card1 in Cards)
+        float calcStart = Time.time;
+        var result = GE.CalculateAiMoveFromHand();
+        float calcEnd = Time.time;
+        float timePassed = calcEnd - calcStart;
+        if (timePassed < 1)
         {
-            bool played = true;
-            foreach (var card2 in GE.State.CardsAtAI)
-                if (card1.name == card2.Id.ToString())
-                    played = false;
-            if (played)
-            {
-                playedCard = card1;
-                break;
-            } 
+            int milisecondsToWait = 1000 - (int)(timePassed * 1000);
+            await Task.Delay(milisecondsToWait);
         }
+        GameObject playedCard = cards.First(c => c.name == result.Item1.Id.ToString());
         RawImage playedCardImage = playedCard.GetComponent<RawImage>();
         playedCardImage.texture = GameEngine.FULL_DECK.First(c => c.Id == int.Parse(playedCard.name)).FrontPic;
         await Task.Delay(2000);
-        if (!collectedFromMiddle.Any())
+        if (!result.Item2.Any())
         {
             middleAreaScript.Receive(playedCard);
         }
         else
         {
-            DeterminePlaceInCollection(playedCard, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(playedCard.name)).Type);
-            foreach (var cardFromMiddle in collectedFromMiddle)
+            SelectRowInCollection(playedCard, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(playedCard.name)).Type);
+            foreach (var cardFromMiddle in result.Item2)
             {
-                GameObject card = middleAreaScript.Cards.First(c => c.name == cardFromMiddle.Id.ToString());
-                middleAreaScript.Cards.Remove(card);
-                DeterminePlaceInCollection(card, GameEngine.FULL_DECK.First(c => c.Id == cardFromMiddle.Id).Type);
+                GameObject card = middleAreaScript.cards.First(c => c.name == cardFromMiddle.Id.ToString());
+                middleAreaScript.cards.Remove(card);
+                SelectRowInCollection(card, GameEngine.FULL_DECK.First(c => c.Id == cardFromMiddle.Id).Type);
             }
         }
-        Cards.Remove(playedCard);
+        cards.Remove(playedCard);
 
-        await Task.Delay(1000);
         await HandleAIFlipTopCard();
     }
 
     public async Task HandleAIFlipTopCard()
     {
-        GE.DrawCard();
+        await Task.Delay(1000);
+        GE.FlipTopCard();
         middleAreaScript.FlipTopCard();
-        await Task.Delay(2000);
-        GE.HandleDrawnCard();
 
+        float calcStart = Time.time;
+        GE.HandleFlippedCard();
+        float calcEnd = Time.time;
+        float timePassed = calcEnd - calcStart;
+        if (timePassed < 2)
+        {
+            int milisecondsToWait = 2000 - (int)(timePassed * 1000);
+            await Task.Delay(milisecondsToWait);
+        }
+
+        // ezen még lehetne szépíteni
         List<GameObject> collectedCards = new List<GameObject>();
-        foreach (var card1 in middleAreaScript.MarkedCards)
+        foreach (var card1 in middleAreaScript.markedCards)
         {
             bool collected = true;
-            foreach (var card2 in GE.State.CardsInMiddle)
+            foreach (var card2 in GE.currentState.CardsInMiddle)
             {
                 if (card1.name == card2.Id.ToString())
                     collected = false;
@@ -102,13 +106,28 @@ public class OpponentAreaScript : MonoBehaviour
                 collectedCards.Add(card1);
             }  
         }
-        middleAreaScript.HandleAiFlippedCard(collectedCards);
+        GameObject cardToCollectFromMiddle = null;
+        if (collectedCards.Count == 1)
+            cardToCollectFromMiddle = collectedCards.First();
+        middleAreaScript.HandleFlippedCard(cardToCollectFromMiddle);
 
-        GE.DrawnCard = null;
-        GE.Phase = GE.State.CardsAtAI.Count > 0 ? Phase.PLAYER_FROM_HAND : (GameEngine.endGameAlreadyStarted ? Phase.PLAYER_MOVE_BLOCKED : Phase.ENDGAME);
+        GE.flippedCard = null;
+        
+        if (GE.currentState.CardsAtAI.Any())
+        {
+            GE.currentPhase = Phase.PLAYER_FROM_HAND;
+        }
+        else if (GameEngine.isZeroSum)
+        {
+            GE.currentPhase = GameEngine.endGameAlreadyStarted ? Phase.PLAYER_MOVE_BLOCKED : Phase.ENDGAME;
+        }
+        else
+        {
+            GE.currentPhase = Phase.GAME_OVER;
+        }
     }
 
-    private void DeterminePlaceInCollection(GameObject card, CardType type)
+    private void SelectRowInCollection(GameObject card, CardType type)
     {
         switch (type)
         {

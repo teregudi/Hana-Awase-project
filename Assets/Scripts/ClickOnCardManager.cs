@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ClickOnCardManager : MonoBehaviour
 {
-    private GameEngine GE = GameEngine.getGE();
+    private GameEngine GE;
     private GameObject playerArea;
     private GameObject middleArea;
     private PlayerAreaScript playerAreaScript;
@@ -12,7 +12,7 @@ public class ClickOnCardManager : MonoBehaviour
 
     public void Start()
     {
-        GE = GameEngine.getGE();
+        GE = GameEngine.GetGameEngine();
         playerArea = GameObject.Find("PlayerArea");
         playerAreaScript = playerArea.GetComponent<PlayerAreaScript>();
         middleArea = GameObject.Find("MiddleArea");
@@ -21,27 +21,25 @@ public class ClickOnCardManager : MonoBehaviour
 
     public void OnClick()
     {
-        //Debug.Log(GameEngine.FULL_DECK.First(c => c.Id == int.Parse(gameObject.name)));
-
-        if (GE.Phase == Phase.PLAYER_MOVE_BLOCKED)
+        if (GE.currentPhase == Phase.PLAYER_MOVE_BLOCKED)
             return;
         // when player choose a card from hand
-        if (transform.parent.name == playerArea.name && GE.Phase == Phase.PLAYER_FROM_HAND)
+        if (transform.parent.name == playerArea.name && GE.currentPhase == Phase.PLAYER_FROM_HAND)
         {
             playerAreaScript.MarkCardInHand(gameObject);
         }
         // when player wants to drop chosen card to the middle
-        else if (transform.parent.name == middleArea.name && playerAreaScript.MarkedCard != null && !middleAreaScript.MarkedCards.Any())
+        else if (transform.parent.name == middleArea.name && playerAreaScript.markedCard != null && !middleAreaScript.markedCards.Any())
         {
-            GE.MoveCardFromPlayerToMiddle(playerAreaScript.MarkedCard);
+            GE.MoveCardFromPlayerToMiddle(playerAreaScript.markedCard);
 
             playerAreaScript.PassToMiddle();
             HandleFlippingTopCard();
         }
         // when player wants to collect matching cards from hand
-        else if (transform.parent.name == middleArea.name && GE.Phase == Phase.PLAYER_FROM_HAND && middleAreaScript.MarkedCards.Contains(gameObject))
+        else if (transform.parent.name == middleArea.name && GE.currentPhase == Phase.PLAYER_FROM_HAND && middleAreaScript.markedCards.Contains(gameObject))
         {
-            GE.MoveCardFromPlayerToCollection(playerAreaScript.MarkedCard);
+            GE.MoveCardFromPlayerToCollection(playerAreaScript.markedCard);
             GE.MoveCardFromMiddleToPlayerCollection(gameObject);
 
             playerAreaScript.PassToCollection();
@@ -49,33 +47,32 @@ public class ClickOnCardManager : MonoBehaviour
             HandleFlippingTopCard();
         }
         // when player wants to collect matching cards from deck
-        else if (transform.parent.name == middleArea.name && GE.Phase == Phase.PLAYER_FROM_DECK && middleAreaScript.MarkedCards.Contains(gameObject))
+        else if (transform.parent.name == middleArea.name && GE.currentPhase == Phase.PLAYER_FROM_DECK && middleAreaScript.markedCards.Contains(gameObject))
         {
-            GE.HandleChoiceAfterDraw(gameObject);
-            middleAreaScript.HandleChoiceAfterDraw(gameObject);
-            GE.DrawnCard = null;
-            GE.Phase = GE.State.CardsAtPlayer.Count > 0 ? Phase.AI_TURN_BEGIN : Phase.PLAYER_MOVE_BLOCKED;
+            GE.HandleChoiceAfterFlipByPlayer(gameObject);
+            middleAreaScript.HandleFlippedCard(gameObject);
+            GE.flippedCard = null;
+            GE.currentPhase = GE.currentState.CardsAtPlayer.Count > 0 ? Phase.AI_TURN_BEGIN : Phase.PLAYER_MOVE_BLOCKED;
         }
     }
 
     public async void HandleFlippingTopCard()
     {
-        GE.DrawCard();
-
+        GE.FlipTopCard();
         middleAreaScript.FlipTopCard();
 
-        if (middleAreaScript.MarkedCards.Count == 2)
+        if (middleAreaScript.markedCards.Count == 2)
         {
-            GE.Phase = Phase.PLAYER_FROM_DECK;
+            GE.currentPhase = Phase.PLAYER_FROM_DECK;
         }
         else
         {
-            GE.Phase = Phase.PLAYER_MOVE_BLOCKED;
+            GE.currentPhase = Phase.PLAYER_MOVE_BLOCKED;
             await Task.Delay(2000);
-            GE.HandleDrawnCard();
+            GE.HandleFlippedCard();
             middleAreaScript.HandleFlippedCard();
-            GE.DrawnCard = null;
-            GE.Phase = Phase.AI_TURN_BEGIN;
+            GE.flippedCard = null;
+            GE.currentPhase = Phase.AI_TURN_BEGIN;
         }
     }
 }

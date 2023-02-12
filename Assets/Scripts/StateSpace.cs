@@ -4,8 +4,6 @@ using System.Linq;
 
 public class StateSpace : ICloneable
 {
-    private static GameEngine GE = GameEngine.getGE();
-
     public List<Card> CardsAtPlayer { get; set; } = new List<Card>();
     public List<Card> CardsAtAI { get; set; } = new List<Card>();
     public List<Card> CardsInMiddle { get; set; } = new List<Card>();
@@ -13,24 +11,16 @@ public class StateSpace : ICloneable
     public List<Card> CardsCollectedByAI { get; set; } = new List<Card>();
     public float Probability { get; set; } = 1;
 
-    public int GetPlayerAdditiveScore()
+    public int GetPlayerScore()
     {
-        return CalculateAdditiveScore(CardsCollectedByPlayer);
+        if (GameEngine.isZeroSum) return CalculateAdditiveScore(CardsCollectedByPlayer) - PointsForYakus(CardsCollectedByAI) - 132;
+        else return CalculateAdditiveScore(CardsCollectedByPlayer);
     }
 
-    public int GetAiAdditiveScore()
+    public int GetAiScore()
     {
-        return PointsForCapturedCards(CardsCollectedByAI) + PointsForYakus(CardsCollectedByAI);
-    }
-
-    public int GetPlayerZeroSumScore()
-    {
-        return CalculateAdditiveScore(CardsCollectedByPlayer) - PointsForYakus(CardsCollectedByAI) - 132;
-    }
-
-    public int GetAiZeroSumScore()
-    {
-        return CalculateAdditiveScore(CardsCollectedByAI) - PointsForYakus(CardsCollectedByPlayer) - 132;
+        if (GameEngine.isZeroSum) return CalculateAdditiveScore(CardsCollectedByAI) - PointsForYakus(CardsCollectedByPlayer) - 132;
+        else return CalculateAdditiveScore(CardsCollectedByAI);
     }
 
     private int CalculateAdditiveScore(List<Card> cards)

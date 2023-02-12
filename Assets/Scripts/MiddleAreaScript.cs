@@ -21,17 +21,17 @@ public class MiddleAreaScript : MonoBehaviour
 
     public Texture blackBack;
     public GameObject cardPrefab;
+    public GameObject gameOverPrefab;
+    public Text playerScore;
+    public Text aiScore;
 
-    public Text PlayerScore;
-    public Text AiScore;
-
-    public List<GameObject> Cards { get; set; } = new List<GameObject>();
-    public List<GameObject> MarkedCards { get; set; } = new List<GameObject>();
-    public GameObject FlippedCard { get; set; }
+    public List<GameObject> cards = new List<GameObject>();
+    public List<GameObject> markedCards = new List<GameObject>();
+    public GameObject flippedCard = null;
 
     void Start()
     {
-        GE = GameEngine.getGE();
+        GE = GameEngine.GetGameEngine();
         deckArea = GameObject.Find("DeckArea");
         playerAreaScript = GameObject.Find("PlayerArea").GetComponent<PlayerAreaScript>();
         playerBrightScript = GameObject.Find("PlayerBright").GetComponent<PlayerBrightScript>();
@@ -43,30 +43,33 @@ public class MiddleAreaScript : MonoBehaviour
         opponentAnimalScript = GameObject.Find("OpponentAnimal").GetComponent<OpponentAnimalScript>();
         opponentRibbonScript = GameObject.Find("OpponentRibbon").GetComponent<OpponentRibbonScript>();
         opponentChaffScript = GameObject.Find("OpponentChaff").GetComponent<OpponentChaffScript>();
-        PlayerScore = GameObject.Find("PlayerScore").GetComponent<Text>();
-        AiScore = GameObject.Find("AiScore").GetComponent<Text>();
+        playerScore = GameObject.Find("PlayerScore").GetComponent<Text>();
+        aiScore = GameObject.Find("AiScore").GetComponent<Text>();
     }
 
     void Update()
     {
-        if (GE.Phase == Phase.ENDGAME)
+        if (GE.currentPhase == Phase.ENDGAME)
         {
-            GE.Phase = Phase.PLAYER_MOVE_BLOCKED;
+            GE.currentPhase = Phase.PLAYER_MOVE_BLOCKED;
             GameEngine.endGameAlreadyStarted = true;
             EndGame();
         }
 
-        if (GE.Phase == Phase.GAME_OVER)
+        if (GE.currentPhase == Phase.GAME_OVER)
         {
-            GE.DebugLog();
-            Debug.Log("GAME OVER");
+            GE.currentPhase = Phase.PLAYER_MOVE_BLOCKED;
+            GameObject gameOver = Instantiate(gameOverPrefab, new Vector2(0, 0), Quaternion.identity);
+            //Text t = gameOver.GetComponent<Text>();
+            //t.text = "FFFFFFFFF";
+            gameOver.transform.SetParent(transform, false);
         }
     }
 
     public void Receive(GameObject card)
     {
-        Cards.Add(card);
-        if (Cards.Count > 12)
+        cards.Add(card);
+        if (cards.Count > 12)
         {
             GridLayoutGroup glg = GetComponent<GridLayoutGroup>();
             glg.spacing = new Vector2(0, 40);
@@ -87,29 +90,29 @@ public class MiddleAreaScript : MonoBehaviour
     public void FindAndMarkPossibleMatches(string idString)
     {
         int id = int.Parse(idString);
-        foreach (var card in Cards)
+        foreach (var card in cards)
         {
             if (int.Parse(card.name) / 10 == id / 10)
             {
                 RawImage image = card.GetComponent<RawImage>();
-                image.texture = GE.RED_DECK.First(c => c.Id == int.Parse(card.name)).FrontPic;
-                MarkedCards.Add(card);
+                image.texture = GameEngine.RED_DECK.First(c => c.Id == int.Parse(card.name)).FrontPic;
+                markedCards.Add(card);
             }
         }
-        foreach (var card in MarkedCards)
+        foreach (var card in markedCards)
         {
-            Cards.Remove(card);
+            cards.Remove(card);
         }
     }
 
     public void ResetMarkedCards()
     {
-        foreach (var card in MarkedCards)
+        foreach (var card in markedCards)
         {
             Unmark(card);
-            Cards.Add(card);
+            cards.Add(card);
         }
-        MarkedCards.Clear();
+        markedCards.Clear();
     }
 
     private void Unmark(GameObject card)
@@ -120,33 +123,27 @@ public class MiddleAreaScript : MonoBehaviour
 
     public void PassToCollection(GameObject chosenCard)
     {
-        CardType type = GameEngine.FULL_DECK.First(c => c.Id == int.Parse(chosenCard.name)).Type;
-        if (MarkedCards.Count == 2)
+        if (markedCards.Count == 2)
         {
             Unmark(chosenCard);
-            DeterminePlaceInCollection(chosenCard, type);
-            MarkedCards.Remove(chosenCard);
+            DeterminePlaceInCollection(chosenCard, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(chosenCard.name)).Type);
+            markedCards.Remove(chosenCard);
             ResetMarkedCards();
         }
         else
         {
-            foreach (var card in MarkedCards)
-            {
-                Unmark(card);
-                DeterminePlaceInCollection(card, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(card.name)).Type);
-            }
-            MarkedCards.Clear();
+            PassAllMarkedToCollection();
         }
     }
 
     public void PassAllMarkedToCollection()
     {
-        foreach (var card in MarkedCards)
+        foreach (var card in markedCards)
         {
             Unmark(card);
             DeterminePlaceInCollection(card, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(card.name)).Type);
         }
-        MarkedCards.Clear();
+        markedCards.Clear();
     }
 
     public void DeterminePlaceInCollection(GameObject card, CardType type)
@@ -154,23 +151,23 @@ public class MiddleAreaScript : MonoBehaviour
         switch (type)
         {
             case CardType.BRIGHT:
-                if (GE.Phase == Phase.AI_TURN) opponentBrightScript.Receive(card);
+                if (GE.currentPhase == Phase.AI_TURN) opponentBrightScript.Receive(card);
                 else playerBrightScript.Receive(card);
                 break;
             case CardType.ANIMAL:
-                if (GE.Phase == Phase.AI_TURN) opponentAnimalScript.Receive(card);
+                if (GE.currentPhase == Phase.AI_TURN) opponentAnimalScript.Receive(card);
                 else playerAnimalScript.Receive(card);
                 break;
             case CardType.RIBBON:
-                if (GE.Phase == Phase.AI_TURN) opponentRibbonScript.Receive(card);
+                if (GE.currentPhase == Phase.AI_TURN) opponentRibbonScript.Receive(card);
                 else playerRibbonScript.Receive(card);
                 break;
             case CardType.CHAFF:
-                if (GE.Phase == Phase.AI_TURN) opponentChaffScript.Receive(card);
+                if (GE.currentPhase == Phase.AI_TURN) opponentChaffScript.Receive(card);
                 else playerChaffScript.Receive(card);
                 break;
         }
-        if (Cards.Count <= 12)
+        if (cards.Count <= 12)
         {
             GridLayoutGroup glg = GetComponent<GridLayoutGroup>();
             glg.spacing = new Vector2(20, 40);
@@ -180,9 +177,9 @@ public class MiddleAreaScript : MonoBehaviour
 
     public void OnClick()
     {
-        if (playerAreaScript.MarkedCard != null && !MarkedCards.Any())
+        if (playerAreaScript.markedCard != null && !markedCards.Any())
         {
-            GE.MoveCardFromPlayerToMiddle(playerAreaScript.MarkedCard);
+            GE.MoveCardFromPlayerToMiddle(playerAreaScript.markedCard);
             playerAreaScript.PassToMiddle();
             cardPrefab.GetComponent<ClickOnCardManager>().Start();
             cardPrefab.GetComponent<ClickOnCardManager>().HandleFlippingTopCard();
@@ -191,81 +188,48 @@ public class MiddleAreaScript : MonoBehaviour
 
     public void FlipTopCard()
     {
-        FlippedCard = GameObject.Find("deck");
-        FlippedCard.name = GE.DrawnCard.Id.ToString();
-        RawImage flippedImage = FlippedCard.GetComponent<RawImage>();
-        flippedImage.texture = GE.DrawnCard.FrontPic;
+        flippedCard = GameObject.Find("deck");
+        flippedCard.name = GE.flippedCard.Id.ToString();
+        RawImage flippedImage = flippedCard.GetComponent<RawImage>();
+        flippedImage.texture = GE.flippedCard.FrontPic;
 
-        FindAndMarkPossibleMatches(FlippedCard.name);
+        FindAndMarkPossibleMatches(flippedCard.name);
     }
 
-    public void HandleFlippedCard()
+    public void HandleFlippedCard(GameObject chosenCard = null)
     {
-        if (MarkedCards.Count == 0)
+        if (markedCards.Count == 0)
         {
-            Receive(FlippedCard);
-            FlippedCard = null;
-            SetNewDeckPlaceholder();
-        }
-        else if (MarkedCards.Count == 1 || MarkedCards.Count == 3)
-        {
-            DeterminePlaceInCollection(FlippedCard, GE.DrawnCard.Type);
-            FlippedCard = null;
-            PassAllMarkedToCollection();
-            SetNewDeckPlaceholder();
-        }
-    }
-
-    public void HandleAiFlippedCard(IEnumerable<GameObject> collectedCards)
-    {
-        if (!collectedCards.Any())
-        {
-            Receive(FlippedCard);
-            FlippedCard = null;
-            SetNewDeckPlaceholder();
+            Receive(flippedCard);
         }
         else
         {
-            DeterminePlaceInCollection(FlippedCard, GE.DrawnCard.Type);
-            FlippedCard = null;
-            foreach (var card in collectedCards)
+            DeterminePlaceInCollection(flippedCard, GE.flippedCard.Type);
+            if (markedCards.Count == 1 || markedCards.Count == 3)
             {
-                Unmark(card);
-                DeterminePlaceInCollection(card, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(card.name)).Type);
-                MarkedCards.Remove(card);
+                PassAllMarkedToCollection();
             }
-            ResetMarkedCards();
-            SetNewDeckPlaceholder();
+            else
+            {
+                Unmark(chosenCard);
+                DeterminePlaceInCollection(chosenCard, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(chosenCard.name)).Type);
+                markedCards.Remove(chosenCard);
+                ResetMarkedCards();
+            }
         }
-    }
-
-    public void HandleChoiceAfterDraw(GameObject chosenCard)
-    {
-        DeterminePlaceInCollection(FlippedCard, GE.DrawnCard.Type);
-        Unmark(chosenCard);
-        DeterminePlaceInCollection(chosenCard, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(chosenCard.name)).Type);
-        MarkedCards.Remove(chosenCard);
-        ResetMarkedCards();
+        flippedCard = null;
         SetNewDeckPlaceholder();
     }
 
     public void RefreshScore()
     {
-        if (GE.isZeroSum)
-        {
-            PlayerScore.text = "Player score:\n" + GE.State.GetPlayerZeroSumScore().ToString();
-            AiScore.text = "Opponent score:\n" + GE.State.GetAiZeroSumScore().ToString();
-        }
-        else
-        {
-            PlayerScore.text = "Player score:\n" + GE.State.GetPlayerAdditiveScore().ToString();
-            AiScore.text = "Opponent score:\n" + GE.State.GetAiAdditiveScore().ToString();
-        }
+        playerScore.text = "Player score:\n" + GE.currentState.GetPlayerScore().ToString();
+        aiScore.text = "Opponent score:\n" + GE.currentState.GetAiScore().ToString();
     }
 
     private void SetNewDeckPlaceholder()
     {
-        if (GE.Deck.Count == 0 && GE.State.CardsInMiddle.Count == 0) return;
+        if (GE.deck.Count == 0 && GE.currentState.CardsInMiddle.Count == 0) return;
         GameObject newDeckTopCard = Instantiate(cardPrefab, new Vector2(0, 0), Quaternion.identity);
         RawImage backOfCard = newDeckTopCard.GetComponent<RawImage>();
         backOfCard.texture = blackBack;
@@ -275,39 +239,39 @@ public class MiddleAreaScript : MonoBehaviour
 
     private async void EndGame()
     {
-        while (GE.Deck.Count > 0 && GE.State.CardsInMiddle.Count > 0)
+        while (GE.deck.Count > 0 && GE.currentState.CardsInMiddle.Count > 0)
         {
             await Task.Delay(1000);
-            GE.DrawCard();
+            GE.FlipTopCard();
             FlipTopCard();
-            if (MarkedCards.Count == 2)
+            if (markedCards.Count == 2)
             {
-                GE.Phase = Phase.PLAYER_FROM_DECK;
+                GE.currentPhase = Phase.PLAYER_FROM_DECK;
                 await WaitForPlayerToChoose();
             }
             else
             {
                 await Task.Delay(2000);
-                GE.HandleDrawnCard();
+                GE.HandleFlippedCard();
                 HandleFlippedCard();
-                GE.DrawnCard = null;
+                GE.flippedCard = null;
             }
 
-            if (GE.Deck.Count == 0 && GE.State.CardsInMiddle.Count == 0)
+            if (GE.deck.Count == 0 && GE.currentState.CardsInMiddle.Count == 0)
             {
                 break;
             }
 
-            GE.Phase = Phase.AI_TURN;
+            GE.currentPhase = Phase.AI_TURN;
             await Task.Delay(1000);
             await opponentAreaScript.HandleAIFlipTopCard();
         }
-        GE.Phase = Phase.GAME_OVER;
+        GE.currentPhase = Phase.GAME_OVER;
     }
 
     private async Task WaitForPlayerToChoose()
     {
-        while (GE.Phase != Phase.PLAYER_MOVE_BLOCKED);
+        while (GE.currentPhase != Phase.PLAYER_MOVE_BLOCKED);
         await Task.Delay(1000);
     }
 }
