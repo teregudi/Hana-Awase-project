@@ -67,6 +67,7 @@ namespace Assets.Scripts
                 clone.CardsInMiddle.Add(cardToDrop);
                 states.Add(clone);
             }
+            // csak a három legtöbb ponttal kecsegtető ágat építjük tovább
             return states.OrderByDescending(s => s.GetAiScore()).Take(3).ToList();
         }
 
@@ -80,7 +81,6 @@ namespace Assets.Scripts
             // mivel MIN ágon úgyis a legrosszabb eshetőséget vesszük,
             // ezért csak azokat az eseteket vizsgáljuk, ahol a player el tud vinni valamit középről
             var playableCards = allUnknownCards.Where(u => InitialState.CardsInMiddle.Any(m => m.Month == u.Month));
-            //var playableCards = allUnknownCards;
 
             List<StateSpace> states = new List<StateSpace>();
             foreach (var cardFromPlayerHand in playableCards)
@@ -108,48 +108,43 @@ namespace Assets.Scripts
                     }
                 }
             }
-            // egy kis trükközés, talán beválik
+            // az összes eshetőség közül csak a két legeredményesebbet vesszük figyelembe
             return states.OrderByDescending(s => s.GetPlayerScore()).Take(2).ToList();
-            //var states2 = states.OrderByDescending(s => s.GetPlayerScore()).Take(1).ToList();
-            //states2.Add(states.OrderBy(s => s.GetPlayerScore()).First());
-            //return states2;
         }
 
         private List<StateSpace> CreateStatesByDrawingFromDeck()
         {
-            List<StateSpace> states = new List<StateSpace>();
-            StateSpace clone = (StateSpace)InitialState.Clone();
+            //List<StateSpace> states = new List<StateSpace>();
+            //StateSpace clone = (StateSpace)InitialState.Clone();
+            //if (NodeType == NodeType.CHANCE_AFTER_MAX)
+            //{
+            //    Card cardToDrop = CalculateLessFavourableCardForAi();
+            //    clone.CardsInMiddle.Add(cardToDrop);
+            //    states.Add(clone);
+            //    return states;
+            //}
 
-            if (NodeType == NodeType.CHANCE_AFTER_MAX)
-            {
-                //Card cardToDrop = CalculateLessFavourableCardForAi();
-                //clone.CardsInMiddle.Add(cardToDrop);
-                //states.Add(clone);
-                //return states;
-                return CalculateRandomChanceStates(4);
-            }
+            //if (NodeType == NodeType.CHANCE_AFTER_MIN)
+            //{
+            //    (Card, List<Card>) cardAndMatches = CalculateMostFavourableCardForPlayer();
+            //    if (cardAndMatches == (null, null))
+            //    {
+            //        states.Add(clone);
+            //        return states;
+            //    }
+            //    clone.CardsCollectedByPlayer.Add(cardAndMatches.Item1);
+            //    clone.CardsCollectedByPlayer.AddRange(cardAndMatches.Item2);
+            //    foreach (var match in cardAndMatches.Item2)
+            //    {
+            //        clone.CardsInMiddle.Remove(match);
+            //    }
+            //    states.Add(clone);
+            //    return states;
+            //}
+            //states.Add(clone);
+            //return states;
 
-            if (NodeType == NodeType.CHANCE_AFTER_MIN)
-            {
-                //(Card, List<Card>) cardAndMatches = CalculateMostFavourableCardForPlayer();
-                //if (cardAndMatches == (null, null))
-                //{
-                //    states.Add(clone);
-                //    return states;
-                //}
-                //clone.CardsCollectedByPlayer.Add(cardAndMatches.Item1);
-                //clone.CardsCollectedByPlayer.AddRange(cardAndMatches.Item2);
-                //foreach (var match in cardAndMatches.Item2)
-                //{
-                //    clone.CardsInMiddle.Remove(match);
-                //}
-                //states.Add(clone);
-                //return states;
-                return CalculateRandomChanceStates(4);
-            }
-
-            states.Add(clone);
-            return states;
+            return CalculateRandomChanceStates(4);
         }
 
         private IEnumerable<Card> GetAllUnknownCards()

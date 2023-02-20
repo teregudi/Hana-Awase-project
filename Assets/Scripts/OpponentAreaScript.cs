@@ -117,13 +117,16 @@ public class OpponentAreaScript : MonoBehaviour
         {
             GE.currentPhase = Phase.PLAYER_FROM_HAND;
         }
-        else if (GameEngine.isZeroSum)
-        {
-            GE.currentPhase = GameEngine.endGameAlreadyStarted ? Phase.PLAYER_MOVE_BLOCKED : Phase.ENDGAME;
-        }
         else
         {
-            GE.currentPhase = Phase.GAME_OVER;
+            if (GameEngine.isZeroSum)
+            {
+                GE.currentPhase = GameEngine.endGameAlreadyStarted ? Phase.PLAYER_MOVE_BLOCKED : Phase.ENDGAME;
+            }
+            else
+            {
+                GE.currentPhase = Phase.GAME_OVER;
+            }
         }
     }
 

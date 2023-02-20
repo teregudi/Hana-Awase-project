@@ -11,11 +11,9 @@ GameObject:
   - component: {fileID: 1248962648486297127}
   - component: {fileID: 5639984602391846281}
   - component: {fileID: 1510841793570284196}
-  - component: {fileID: -3165803832693224393}
   - component: {fileID: 2749219464837164180}
   - component: {fileID: -2450076826980087537}
   - component: {fileID: -1039143396202137345}
-  - component: {fileID: -9019070204111155811}
   - component: {fileID: -1462874529347157425}
   m_Layer: 6
   m_Name: CardPrefab
@@ -79,21 +77,6 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
---- !u!114 &-3165803832693224393
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8101078277246865026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c035ee72d40eb5945bd73e6292f012ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Canvas: {fileID: 0}
-  MiddleArea: {fileID: 0}
-  PlayerArea: {fileID: 4044421310745376599, guid: 6be47647b9fafbf45b02b727c41e88e5, type: 3}
 --- !u!114 &2749219464837164180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -111,7 +94,7 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: -3165803832693224393}
+        - m_Target: {fileID: 0}
           m_TargetAssemblyTypeName: DragDrop, Assembly-CSharp
           m_MethodName: StartDrag
           m_Mode: 1
@@ -127,7 +110,7 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: -3165803832693224393}
+        - m_Target: {fileID: 0}
           m_TargetAssemblyTypeName: DragDrop, Assembly-CSharp
           m_MethodName: EndDrag
           m_Mode: 1
@@ -202,19 +185,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 7
---- !u!114 &-9019070204111155811
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8101078277246865026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9847a60c686e7b4cb86c193b205e43e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cardPrefab: {fileID: 8101078277246865026}
 --- !u!114 &-1462874529347157425
 MonoBehaviour:
   m_ObjectHideFlags: 0

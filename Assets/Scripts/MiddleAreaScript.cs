@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class MiddleAreaScript : MonoBehaviour
 {
@@ -18,10 +19,10 @@ public class MiddleAreaScript : MonoBehaviour
     private OpponentAnimalScript opponentAnimalScript;
     private OpponentRibbonScript opponentRibbonScript;
     private OpponentChaffScript opponentChaffScript;
-
+    
     public Texture blackBack;
     public GameObject cardPrefab;
-    public GameObject gameOverPrefab;
+    
     public Text playerScore;
     public Text aiScore;
 
@@ -55,15 +56,6 @@ public class MiddleAreaScript : MonoBehaviour
             GameEngine.endGameAlreadyStarted = true;
             EndGame();
         }
-
-        if (GE.currentPhase == Phase.GAME_OVER)
-        {
-            GE.currentPhase = Phase.PLAYER_MOVE_BLOCKED;
-            GameObject gameOver = Instantiate(gameOverPrefab, new Vector2(0, 0), Quaternion.identity);
-            //Text t = gameOver.GetComponent<Text>();
-            //t.text = "FFFFFFFFF";
-            gameOver.transform.SetParent(transform, false);
-        }
     }
 
     public void Receive(GameObject card)
@@ -74,16 +66,6 @@ public class MiddleAreaScript : MonoBehaviour
             GridLayoutGroup glg = GetComponent<GridLayoutGroup>();
             glg.spacing = new Vector2(0, 40);
         }
-        //if (Cards.Count > 8)
-        //{
-        //    GameObject p = GameObject.Find("TT Canvas");
-        //    card.transform.SetParent(p.transform, true);
-        //    Transform target = opponentAreaScript.Cards.First().transform;
-        //    card.transform.position = new Vector2(0, 0);
-        //    card.transform.position = Vector3.Lerp(card.transform.position, new Vector3(0, 0), Time.deltaTime * 5);
-        //}
-        //else
-
         card.transform.SetParent(transform, false);
     }
 
@@ -202,20 +184,18 @@ public class MiddleAreaScript : MonoBehaviour
         {
             Receive(flippedCard);
         }
+        else if (markedCards.Count == 1 || markedCards.Count == 3)
+        {
+            DeterminePlaceInCollection(flippedCard, GE.flippedCard.Type);
+            PassAllMarkedToCollection();
+        }
         else
         {
             DeterminePlaceInCollection(flippedCard, GE.flippedCard.Type);
-            if (markedCards.Count == 1 || markedCards.Count == 3)
-            {
-                PassAllMarkedToCollection();
-            }
-            else
-            {
-                Unmark(chosenCard);
-                DeterminePlaceInCollection(chosenCard, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(chosenCard.name)).Type);
-                markedCards.Remove(chosenCard);
-                ResetMarkedCards();
-            }
+            Unmark(chosenCard);
+            DeterminePlaceInCollection(chosenCard, GameEngine.FULL_DECK.First(c => c.Id == int.Parse(chosenCard.name)).Type);
+            markedCards.Remove(chosenCard);
+            ResetMarkedCards();
         }
         flippedCard = null;
         SetNewDeckPlaceholder();
@@ -223,8 +203,8 @@ public class MiddleAreaScript : MonoBehaviour
 
     public void RefreshScore()
     {
-        playerScore.text = "Player score:\n" + GE.currentState.GetPlayerScore().ToString();
-        aiScore.text = "Opponent score:\n" + GE.currentState.GetAiScore().ToString();
+        playerScore.text = "Player score\n" + GE.currentState.GetPlayerScore().ToString();
+        aiScore.text = "Opponent score\n" + GE.currentState.GetAiScore().ToString();
     }
 
     private void SetNewDeckPlaceholder()

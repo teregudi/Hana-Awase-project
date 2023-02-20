@@ -9,18 +9,18 @@ using UnityEngine;
 public class GameEngine
 {
     private static GameEngine singleton = null;
-    private static StateFactory stateFactory = new StateFactory();
-    private static int numberOfCardsToDeal = 8; // ezt talán ki lehet majd törölni
-    public static bool endGameAlreadyStarted = false;
-    public static bool isZeroSum = true;
-    public static int difficulty = 3;
-    public static List<Card> FULL_DECK = new List<Card>();
-    public static List<Card> RED_DECK = new List<Card>();
+    private static StateFactory stateFactory;
+    public static int numberOfCardsToDeal; // ezt talán ki lehet majd törölni
+    public static bool endGameAlreadyStarted;
+    public static bool isZeroSum;
+    public static int difficulty;
+    public static List<Card> FULL_DECK;
+    public static List<Card> RED_DECK;
 
-    public StateSpace currentState = new StateSpace();
-    public List<Card> deck = new List<Card>();
-    public Card flippedCard = null;
-    public Phase currentPhase = Phase.PLAYER_FROM_HAND;
+    public StateSpace currentState;
+    public List<Card> deck;
+    public Card flippedCard;
+    public Phase currentPhase;
 
     private GameEngine() { }
 
@@ -32,6 +32,25 @@ public class GameEngine
         }
         return singleton;
     }
+
+    private static void StaticReset()
+    {
+        stateFactory = new StateFactory();
+        numberOfCardsToDeal = 8; // ezt talán ki lehet majd törölni
+        endGameAlreadyStarted = false;
+        FULL_DECK = new List<Card>();
+        RED_DECK = new List<Card>();
+    }
+
+    public void Reset()
+    {
+        StaticReset();
+        currentState = new StateSpace();
+        deck = new List<Card>();
+        flippedCard = null;
+        currentPhase = Phase.PLAYER_FROM_HAND;
+    }
+
     
     public async Task DealCards()
     {
