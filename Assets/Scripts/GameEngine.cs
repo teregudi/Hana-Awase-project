@@ -174,14 +174,14 @@ public class GameEngine
 
     public void MoveCardFromPlayerToCollection(GameObject cardObject)
     {
-        Card card = ConvertGameObjectToCard(cardObject);
+        Card card = currentState.CardsAtPlayer.First(c => c.Id == int.Parse(cardObject.name));
         currentState.CardsAtPlayer.Remove(card);
         currentState.CardsCollectedByPlayer.Add(card);
     }
 
     public void MoveCardFromMiddleToPlayerCollection(GameObject cardObject)
     {
-        Card card = ConvertGameObjectToCard(cardObject);
+        Card card = currentState.CardsInMiddle.First(c => c.Id == int.Parse(cardObject.name));
         var matchingCards = currentState.CardsInMiddle.Where(c => c.Month == card.Month).ToList();
         if (matchingCards.Count() < 3)
         {
@@ -200,14 +200,9 @@ public class GameEngine
 
     public void MoveCardFromPlayerToMiddle(GameObject cardObject)
     {
-        Card card = ConvertGameObjectToCard(cardObject);
+        Card card = currentState.CardsAtPlayer.First(c => c.Id == int.Parse(cardObject.name));
         currentState.CardsAtPlayer.Remove(card);
         currentState.CardsInMiddle.Add(card);
-    }
-
-    private Card ConvertGameObjectToCard(GameObject cardObject)
-    {
-        return FULL_DECK.First(c => c.Id == int.Parse(cardObject.name));
     }
 
     public void FlipTopCard()
@@ -275,7 +270,7 @@ public class GameEngine
     public void HandleChoiceAfterFlipByPlayer(GameObject cardObject)
     {
         currentState.CardsCollectedByPlayer.Add(flippedCard);
-        Card chosenCard = ConvertGameObjectToCard(cardObject);
+        Card chosenCard = currentState.CardsInMiddle.First(c => c.Id == int.Parse(cardObject.name));
         currentState.CardsCollectedByPlayer.Add(chosenCard);
         currentState.CardsInMiddle.Remove(chosenCard);
     }
@@ -287,7 +282,7 @@ public class GameEngine
         List<StateSpace> possibleStates = stateFactory.CreatePossibleStates();
         int indexOfMostFavorableState = 0;
         int highestValue = int.MinValue;
-        Debug.Log("POSSIBLE NODES AND THEIR VALUES");
+        //Debug.Log("POSSIBLE NODES AND THEIR VALUES");
         for (int i = 0; i < possibleStates.Count; i++)
         {
             Node node = new Node(possibleStates[i], NodeType.CHANCE_AFTER_MAX);
@@ -297,10 +292,10 @@ public class GameEngine
                 highestValue = actualValue;
                 indexOfMostFavorableState = i;
             }
-            Debug.Log("NODE " + i);
-            DebugNode(possibleStates[i], actualValue);
+            //Debug.Log("NODE " + i);
+            //DebugNode(possibleStates[i], actualValue);
         }
-        Debug.Log("CHOSEN NODE: " + indexOfMostFavorableState);
+        //Debug.Log("CHOSEN NODE: " + indexOfMostFavorableState);
         Card playedCard = currentState.CardsAtAI.First(c => !possibleStates[indexOfMostFavorableState].CardsAtAI.Contains(c));
         var collectedFromMiddle = currentState.CardsInMiddle.Where(c => possibleStates[indexOfMostFavorableState].CardsCollectedByAI.Contains(c));
         currentState = possibleStates[indexOfMostFavorableState];
@@ -334,23 +329,22 @@ public class GameEngine
         //{
         //    sb.Append("- " + item);
         //}
-        //sb.Append("\nCards in middle:\n");
-        //foreach (var item in State.CardsInMiddle)
-        //{
-        //    sb.Append("- " + item);
-        //}
-        //Debug.Log(sb.ToString());
+        sb.Append("\nCards in middle:\n");
+        foreach (var item in currentState.CardsInMiddle)
+        {
+            sb.Append(" - " + item);
+        }
 
-        //sb.Append("Cards collected by player: \n");
-        //foreach (var card in currentState.CardsCollectedByPlayer)
-        //{
-        //    sb.Append(card + " - ");
-        //}
-        //sb.Append("\nCards collected by robot: \n");
-        //foreach (var card in currentState.CardsCollectedByAI)
-        //{
-        //    sb.Append(card + " - ");
-        //}
+        sb.Append("\nCards collected by player: \n");
+        foreach (var card in currentState.CardsCollectedByPlayer)
+        {
+            sb.Append(card + " - ");
+        }
+        sb.Append("\nCards collected by robot: \n");
+        foreach (var card in currentState.CardsCollectedByAI)
+        {
+            sb.Append(card + " - ");
+        }
 
         Debug.Log(sb.ToString());
     }

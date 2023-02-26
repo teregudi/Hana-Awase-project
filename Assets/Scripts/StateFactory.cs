@@ -19,7 +19,7 @@ namespace Assets.Scripts
                     return CreateStatesForPlayer();
                 case NodeType.CHANCE_AFTER_MAX:
                 case NodeType.CHANCE_AFTER_MIN:
-                    return CreateStatesByDrawingFromDeck();
+                    return CalculateRandomChanceStates(4);
                 default:
                     return new List<StateSpace>();
             }
@@ -67,8 +67,8 @@ namespace Assets.Scripts
                 clone.CardsInMiddle.Add(cardToDrop);
                 states.Add(clone);
             }
-            // csak a három legtöbb ponttal kecsegtető ágat építjük tovább
-            return states.OrderByDescending(s => s.GetAiScore()).Take(3).ToList();
+            // csak a két legtöbb ponttal kecsegtető ágat építjük tovább
+            return states.OrderByDescending(s => s.GetAiScore()).Take(2).ToList();
         }
 
         private List<StateSpace> CreateStatesForPlayer()
@@ -80,7 +80,8 @@ namespace Assets.Scripts
             var allUnknownCards = GetAllUnknownCards();
             // mivel MIN ágon úgyis a legrosszabb eshetőséget vesszük,
             // ezért csak azokat az eseteket vizsgáljuk, ahol a player el tud vinni valamit középről
-            var playableCards = allUnknownCards.Where(u => InitialState.CardsInMiddle.Any(m => m.Month == u.Month));
+            //var playableCards = allUnknownCards.Where(u => InitialState.CardsInMiddle.Any(m => m.Month == u.Month));
+            var playableCards = allUnknownCards;
 
             List<StateSpace> states = new List<StateSpace>();
             foreach (var cardFromPlayerHand in playableCards)
@@ -108,8 +109,8 @@ namespace Assets.Scripts
                     }
                 }
             }
-            // az összes eshetőség közül csak a két legeredményesebbet vesszük figyelembe
-            return states.OrderByDescending(s => s.GetPlayerScore()).Take(2).ToList();
+            // az összes eshetőség közül csak a három legeredményesebbet vesszük figyelembe
+            return states.OrderByDescending(s => s.GetPlayerScore()).Take(3).ToList();
         }
 
         private List<StateSpace> CreateStatesByDrawingFromDeck()

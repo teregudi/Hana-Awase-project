@@ -70,10 +70,10 @@ public class UiManagerScript : MonoBehaviour
                 GameEngine.difficulty = 0;
                 break;
             case 1:
-                GameEngine.difficulty = 5;
+                GameEngine.difficulty = 4;
                 break;
             case 2:
-                GameEngine.difficulty = 9;
+                GameEngine.difficulty = 8;
                 break;
         }
     }

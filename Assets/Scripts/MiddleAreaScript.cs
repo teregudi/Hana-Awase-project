@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public class MiddleAreaScript : MonoBehaviour
 {
@@ -22,7 +21,6 @@ public class MiddleAreaScript : MonoBehaviour
     
     public Texture blackBack;
     public GameObject cardPrefab;
-    
     public Text playerScore;
     public Text aiScore;
 

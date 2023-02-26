@@ -91,7 +91,6 @@ public class OpponentAreaScript : MonoBehaviour
             await Task.Delay(milisecondsToWait);
         }
 
-        // ezen még lehetne szépíteni
         List<GameObject> collectedCards = new List<GameObject>();
         foreach (var card1 in middleAreaScript.markedCards)
         {

@@ -214,7 +214,8 @@ public class Setup : MonoBehaviour
         GameEngine.RED_DECK.Add(new Card(December3Red, 123, CardType.CHAFF, Month.DECEMBER));
         GameEngine.RED_DECK.Add(new Card(December4Red, 124, CardType.CHAFF, Month.DECEMBER));
 
-        GameEngine.FULL_DECK = GE.deck;
+        //GameEngine.FULL_DECK = GE.deck;
+        GE.CopyDeck();
 
         await GE.DealCards();
         DealCards();
