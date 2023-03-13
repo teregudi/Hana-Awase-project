@@ -67,8 +67,8 @@ namespace Assets.Scripts
                 clone.CardsInMiddle.Add(cardToDrop);
                 states.Add(clone);
             }
-            // csak a két legtöbb ponttal kecsegtető ágat építjük tovább
-            return states.OrderByDescending(s => s.GetAiScore()).Take(2).ToList();
+            // csak a három legtöbb ponttal kecsegtető ágat építjük tovább
+            return states.OrderByDescending(s => s.GetAiScore()).Take(3).ToList();
         }
 
         private List<StateSpace> CreateStatesForPlayer()
@@ -77,14 +77,10 @@ namespace Assets.Scripts
             if (InitialState.CardsAtPlayer.Count == 0)
                 return new List<StateSpace> { (StateSpace)InitialState.Clone() };
 
-            var allUnknownCards = GetAllUnknownCards();
-            // mivel MIN ágon úgyis a legrosszabb eshetőséget vesszük,
-            // ezért csak azokat az eseteket vizsgáljuk, ahol a player el tud vinni valamit középről
-            //var playableCards = allUnknownCards.Where(u => InitialState.CardsInMiddle.Any(m => m.Month == u.Month));
-            var playableCards = allUnknownCards;
+            var cardsThatHaveMatch = GetAllUnknownCards().Where(u => InitialState.CardsInMiddle.Any(m => m.Month == u.Month));
 
             List<StateSpace> states = new List<StateSpace>();
-            foreach (var cardFromPlayerHand in playableCards)
+            foreach (var cardFromPlayerHand in cardsThatHaveMatch)
             {
                 StateSpace clone = (StateSpace)InitialState.Clone();
                 var matchingCards = InitialState.CardsInMiddle.Where(c => c.Month == cardFromPlayerHand.Month);
@@ -109,43 +105,61 @@ namespace Assets.Scripts
                     }
                 }
             }
-            // az összes eshetőség közül csak a három legeredményesebbet vesszük figyelembe
-            return states.OrderByDescending(s => s.GetPlayerScore()).Take(3).ToList();
+            // az összes eshetőség közül csak a négy legeredményesebbet vesszük figyelembe
+            return states.OrderByDescending(s => s.GetPlayerScore()).Take(4).ToList();
         }
 
-        private List<StateSpace> CreateStatesByDrawingFromDeck()
+        private List<StateSpace> CalculateRandomChanceStates(int howMany)
         {
-            //List<StateSpace> states = new List<StateSpace>();
-            //StateSpace clone = (StateSpace)InitialState.Clone();
-            //if (NodeType == NodeType.CHANCE_AFTER_MAX)
-            //{
-            //    Card cardToDrop = CalculateLessFavourableCardForAi();
-            //    clone.CardsInMiddle.Add(cardToDrop);
-            //    states.Add(clone);
-            //    return states;
-            //}
-
-            //if (NodeType == NodeType.CHANCE_AFTER_MIN)
-            //{
-            //    (Card, List<Card>) cardAndMatches = CalculateMostFavourableCardForPlayer();
-            //    if (cardAndMatches == (null, null))
-            //    {
-            //        states.Add(clone);
-            //        return states;
-            //    }
-            //    clone.CardsCollectedByPlayer.Add(cardAndMatches.Item1);
-            //    clone.CardsCollectedByPlayer.AddRange(cardAndMatches.Item2);
-            //    foreach (var match in cardAndMatches.Item2)
-            //    {
-            //        clone.CardsInMiddle.Remove(match);
-            //    }
-            //    states.Add(clone);
-            //    return states;
-            //}
-            //states.Add(clone);
-            //return states;
-
-            return CalculateRandomChanceStates(4);
+            List<StateSpace> randomStates = new List<StateSpace>();
+            var unknownCards = GetAllUnknownCards();
+            int[] ints = GenerateRandomInts(howMany);
+            foreach (var index in ints)
+            {
+                StateSpace clone = (StateSpace)InitialState.Clone();
+                var flippedCard = unknownCards.ElementAt(index);
+                var matchingCards = InitialState.CardsInMiddle.Where(c => c.Month == flippedCard.Month);
+                if (!matchingCards.Any())
+                {
+                    clone.CardsInMiddle.Add(flippedCard);
+                    randomStates.Add(clone);
+                }
+                else if (matchingCards.Count() == 1 || matchingCards.Count() == 3)
+                {
+                    clone.CardsInMiddle.RemoveAll(c => c.Month == flippedCard.Month);
+                    if (NodeType == NodeType.CHANCE_AFTER_MAX)
+                    {
+                        clone.CardsCollectedByAI.Add(flippedCard);
+                        clone.CardsCollectedByAI.AddRange(matchingCards);
+                    }
+                    else
+                    {
+                        clone.CardsCollectedByPlayer.Add(flippedCard);
+                        clone.CardsCollectedByPlayer.AddRange(matchingCards);
+                    }
+                    randomStates.Add(clone);
+                }
+                else
+                {
+                    foreach (var matchingCard in matchingCards)
+                    {
+                        StateSpace matchClone = (StateSpace)InitialState.Clone();
+                        matchClone.CardsInMiddle.Remove(matchingCard);
+                        if (NodeType == NodeType.CHANCE_AFTER_MAX)
+                        {
+                            matchClone.CardsCollectedByAI.Add(flippedCard);
+                            matchClone.CardsCollectedByAI.Add(matchingCard);
+                        }
+                        else
+                        {
+                            matchClone.CardsCollectedByPlayer.Add(flippedCard);
+                            matchClone.CardsCollectedByPlayer.Add(matchingCard);
+                        }
+                        randomStates.Add(matchClone);
+                    }
+                }
+            }
+            return randomStates;
         }
 
         private IEnumerable<Card> GetAllUnknownCards()
@@ -232,7 +246,6 @@ namespace Assets.Scripts
                     return new List<Card> { item };
                 }
             }
-            // nem biztos hogy jó ötlet ez a szűrés, de egyelőre maradhat
             var cardsMinusBrights = cards.Where(c => c.Type != CardType.BRIGHT);
             if (!cardsMinusBrights.Any()) return cards;
             var cardsMinusAnimals = cardsMinusBrights.Where(c => c.Type != CardType.ANIMAL);
@@ -242,13 +255,12 @@ namespace Assets.Scripts
             return cardsMinusRibbons;
         }
 
-        private List<StateSpace> CalculateRandomChanceStates(int howmany)
+        private int[] GenerateRandomInts(int howMany)
         {
-            List<StateSpace> randomStates = new List<StateSpace>();
             var unknownCards = GetAllUnknownCards();
-            int[] ints = new int[howmany];
+            int[] ints = new int[howMany];
             ints[0] = Random.Range(0, unknownCards.Count());
-            for (int i = 1; i < howmany; i++)
+            for (int i = 1; i < howMany; i++)
             {
                 int z;
                 do
@@ -257,151 +269,7 @@ namespace Assets.Scripts
                 } while (ints.Contains(z));
                 ints[i] = z;
             }
-            foreach (var index in ints)
-            {
-                StateSpace clone = (StateSpace)InitialState.Clone();
-                var flippedCard = unknownCards.ElementAt(index);
-                var matchingCards = InitialState.CardsInMiddle.Where(c => c.Month == flippedCard.Month);
-                if (!matchingCards.Any())
-                {
-                    clone.CardsInMiddle.Add(flippedCard);
-                    //clone.Probability = 1 / howmany;
-                    randomStates.Add(clone);
-                }
-                else if (matchingCards.Count() == 1 || matchingCards.Count() == 3)
-                {
-                    clone.CardsInMiddle.RemoveAll(c => c.Month == flippedCard.Month);
-                    if (NodeType == NodeType.CHANCE_AFTER_MAX)
-                    {
-                        clone.CardsCollectedByAI.Add(flippedCard);
-                        clone.CardsCollectedByAI.AddRange(matchingCards);
-                    }
-                    else
-                    {
-                        clone.CardsCollectedByPlayer.Add(flippedCard);
-                        clone.CardsCollectedByPlayer.AddRange(matchingCards);
-                    }
-                    //clone.Probability = 1 / howmany;
-                    randomStates.Add(clone);
-                }
-                else
-                {
-                    foreach (var matchingCard in matchingCards)
-                    {
-                        StateSpace matchClone = (StateSpace)InitialState.Clone();
-                        matchClone.CardsInMiddle.Remove(matchingCard);
-                        if (NodeType == NodeType.CHANCE_AFTER_MAX)
-                        {
-                            matchClone.CardsCollectedByAI.Add(flippedCard);
-                            matchClone.CardsCollectedByAI.Add(matchingCard);
-                        }
-                        else
-                        {
-                            matchClone.CardsCollectedByPlayer.Add(flippedCard);
-                            matchClone.CardsCollectedByPlayer.Add(matchingCard);
-                        }
-                        //matchClone.Probability = 1 / howmany;
-                        randomStates.Add(matchClone);
-                    }
-                }
-            }
-            return randomStates;
-        }
-
-        private (Card, List<Card>) CalculateMostFavourableCardForPlayer()
-        {
-            var unknownCards = GetAllUnknownCards();
-            if (!unknownCards.Any())
-            {
-                return (null, null);
-            }
-
-            int maxValue = int.MinValue;
-            Card cardToPlay = unknownCards.ElementAt(0);
-            List<Card> matches = new List<Card>();
-            foreach (var unknownCard in unknownCards)
-            {
-                var matchingCards = InitialState.CardsInMiddle.Where(c => c.Month == unknownCard.Month);
-                if (matchingCards.Count() == 0)
-                {
-                    continue;
-                }
-                else if (matchingCards.Count() == 1 || matchingCards.Count() == 3)
-                {
-                    StateSpace clone = (StateSpace)InitialState.Clone();
-                    clone.CardsCollectedByPlayer.Add(unknownCard);
-                    clone.CardsCollectedByPlayer.AddRange(matchingCards);
-                    if (clone.GetPlayerScore() > maxValue)
-                    {
-                        maxValue = clone.GetPlayerScore();
-                        cardToPlay = unknownCard;
-                        matches = matchingCards.ToList();
-                    }
-                }
-                else if (matchingCards.Count() == 2)
-                {
-                    foreach (var matchingCard in matchingCards)
-                    {
-                        StateSpace clone = (StateSpace)InitialState.Clone();
-                        clone.CardsCollectedByPlayer.Add(unknownCard);
-                        clone.CardsCollectedByPlayer.Add(matchingCard);
-                        if (clone.GetPlayerScore() > maxValue)
-                        {
-                            maxValue = clone.GetPlayerScore();
-                            cardToPlay = unknownCard;
-                            matches = new List<Card> { matchingCard };
-                        }
-                    }
-                }
-            }
-            return (cardToPlay, matches);
-        }
-
-        private Card CalculateLessFavourableCardForAi()
-        {
-            var unknownCards = GetAllUnknownCards();
-
-            var unknownMinusMiddle = unknownCards.Where(u => !InitialState.CardsInMiddle.Any(m => m.Month == u.Month));
-            if (!unknownMinusMiddle.Any())
-            {
-                return unknownCards.First();
-            }
-            var unknownMinusAiHand = unknownMinusMiddle.Where(u => !InitialState.CardsAtAI.Any(a => a.Month == u.Month));
-            if (!unknownMinusAiHand.Any())
-            {
-                return unknownMinusMiddle.First();
-            }
-            return unknownMinusAiHand.First();
-        }
-
-        private void CsakTeszt(List<StateSpace> newStates)
-        {
-            Debug.Log("Na ezeket játszotta ki a human képzeletben:");
-            foreach (var card1 in InitialState.CardsAtPlayer)
-            {
-                bool played = true;
-                foreach (var card2 in newStates[0].CardsAtPlayer)
-                {
-                    if (card1 == card2) played = false;
-                }
-                if (played)
-                {
-                    Debug.Log(card1);
-                }
-            }
-            foreach (var card1 in InitialState.CardsAtPlayer)
-            {
-                bool played = true;
-                foreach (var card2 in newStates[1].CardsAtPlayer)
-                {
-                    if (card1 == card2)
-                        played = false;
-                }
-                if (played)
-                {
-                    Debug.Log(card1);
-                }
-            }
+            return ints;
         }
     }
 }

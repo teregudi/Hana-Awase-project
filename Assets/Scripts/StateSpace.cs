@@ -9,7 +9,6 @@ public class StateSpace : ICloneable
     public List<Card> CardsInMiddle { get; set; } = new List<Card>();
     public List<Card> CardsCollectedByPlayer { get; set; } = new List<Card>();
     public List<Card> CardsCollectedByAI { get; set; } = new List<Card>();
-    public float Probability { get; set; } = 1;
 
     public int GetPlayerScore()
     {
@@ -174,7 +173,6 @@ public class StateSpace : ICloneable
         clone.CardsInMiddle = new List<Card>(CardsInMiddle);
         clone.CardsCollectedByPlayer = new List<Card>(CardsCollectedByPlayer);
         clone.CardsCollectedByAI = new List<Card>(CardsCollectedByAI);
-        clone.Probability = 1;
         return clone;
     }
 }

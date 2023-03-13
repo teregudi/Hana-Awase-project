@@ -10,7 +10,7 @@ public class GameEngine
 {
     private static GameEngine singleton = null;
     private static StateFactory stateFactory;
-    public static int numberOfCardsToDeal; // ezt talán ki lehet majd törölni
+    public static int numberOfCardsToDeal;
     public static bool endGameAlreadyStarted;
     public static bool isZeroSum;
     public static int difficulty;
@@ -36,7 +36,7 @@ public class GameEngine
     private static void StaticReset()
     {
         stateFactory = new StateFactory();
-        numberOfCardsToDeal = 8; // ezt talán ki lehet majd törölni
+        numberOfCardsToDeal = 8;
         endGameAlreadyStarted = false;
         FULL_DECK = new List<Card>();
         RED_DECK = new List<Card>();
@@ -54,7 +54,6 @@ public class GameEngine
     
     public async Task DealCards()
     {
-        //TestDeal();
         bool fourSame;
         do
         {
@@ -82,63 +81,6 @@ public class GameEngine
         deck = deck.GetRange(numberOfCardsToDeal * 3, deck.Count - (numberOfCardsToDeal * 3));
 
         await Task.Delay(1);
-    }
-
-    private void TestDeal()
-    {
-        currentState.CardsAtAI.Add(deck.First(c => c.Id == 84));
-        currentState.CardsAtAI.Add(deck.First(c => c.Id == 121));
-        currentState.CardsAtAI.Add(deck.First(c => c.Id == 32));
-        currentState.CardsAtAI.Add(deck.First(c => c.Id == 81));
-        currentState.CardsAtAI.Add(deck.First(c => c.Id == 92));
-        currentState.CardsAtAI.Add(deck.First(c => c.Id == 101));
-        currentState.CardsAtAI.Add(deck.First(c => c.Id == 93));
-        currentState.CardsAtAI.Add(deck.First(c => c.Id == 44));
-
-        deck.Remove(deck.First(c => c.Id == 84));
-        deck.Remove(deck.First(c => c.Id == 121));
-        deck.Remove(deck.First(c => c.Id == 32));
-        deck.Remove(deck.First(c => c.Id == 81));
-        deck.Remove(deck.First(c => c.Id == 92));
-        deck.Remove(deck.First(c => c.Id == 101));
-        deck.Remove(deck.First(c => c.Id == 93));
-        deck.Remove(deck.First(c => c.Id == 44));
-
-        currentState.CardsInMiddle.Add(deck.First(c => c.Id == 11));
-        currentState.CardsInMiddle.Add(deck.First(c => c.Id == 124));
-        currentState.CardsInMiddle.Add(deck.First(c => c.Id == 31));
-        currentState.CardsInMiddle.Add(deck.First(c => c.Id == 82));
-        currentState.CardsInMiddle.Add(deck.First(c => c.Id == 91));
-        currentState.CardsInMiddle.Add(deck.First(c => c.Id == 102));
-        currentState.CardsInMiddle.Add(deck.First(c => c.Id == 103));
-        currentState.CardsInMiddle.Add(deck.First(c => c.Id == 42));
-
-        deck.Remove(deck.First(c => c.Id == 11));
-        deck.Remove(deck.First(c => c.Id == 124));
-        deck.Remove(deck.First(c => c.Id == 31));
-        deck.Remove(deck.First(c => c.Id == 82));
-        deck.Remove(deck.First(c => c.Id == 91));
-        deck.Remove(deck.First(c => c.Id == 102));
-        deck.Remove(deck.First(c => c.Id == 103));
-        deck.Remove(deck.First(c => c.Id == 42));
-
-        currentState.CardsAtPlayer.Add(deck.First(c => c.Id == 12));
-        currentState.CardsAtPlayer.Add(deck.First(c => c.Id == 13));
-        currentState.CardsAtPlayer.Add(deck.First(c => c.Id == 14));
-        currentState.CardsAtPlayer.Add(deck.First(c => c.Id == 111));
-        currentState.CardsAtPlayer.Add(deck.First(c => c.Id == 61));
-        currentState.CardsAtPlayer.Add(deck.First(c => c.Id == 62));
-        currentState.CardsAtPlayer.Add(deck.First(c => c.Id == 123));
-        currentState.CardsAtPlayer.Add(deck.First(c => c.Id == 34));
-
-        deck.Remove(deck.First(c => c.Id == 12));
-        deck.Remove(deck.First(c => c.Id == 13));
-        deck.Remove(deck.First(c => c.Id == 14));
-        deck.Remove(deck.First(c => c.Id == 111));
-        deck.Remove(deck.First(c => c.Id == 61));
-        deck.Remove(deck.First(c => c.Id == 62));
-        deck.Remove(deck.First(c => c.Id == 123));
-        deck.Remove(deck.First(c => c.Id == 34));
     }
 
     public void CopyDeck()
@@ -252,15 +194,15 @@ public class GameEngine
                 stateA.CardsCollectedByAI.Add(flippedCard);
                 stateA.CardsInMiddle.Remove(matchingCards[0]);
                 stateA.CardsCollectedByAI.Add(matchingCards[0]);
-                Node nodeA = new Node(stateA, NodeType.MIN);
-                int scoreA = Expectiminimax.CalculateNodeValue(nodeA, difficulty);
+                Node nodeA = new Node(stateA, NodeType.MIN, 1);
+                int scoreA = Expectiminimax.CalculateNodeValue(nodeA, difficulty, int.MinValue, int.MaxValue);
 
                 StateSpace stateB = (StateSpace)currentState.Clone();
                 stateB.CardsCollectedByAI.Add(flippedCard);
                 stateB.CardsInMiddle.Remove(matchingCards[1]);
                 stateB.CardsCollectedByAI.Add(matchingCards[1]);
-                Node nodeB = new Node(stateB, NodeType.MIN);
-                int scoreB = Expectiminimax.CalculateNodeValue(nodeB, difficulty);
+                Node nodeB = new Node(stateB, NodeType.MIN, 1);
+                int scoreB = Expectiminimax.CalculateNodeValue(nodeB, difficulty, int.MinValue, int.MaxValue);
 
                 currentState = scoreA > scoreB ? stateA : stateB;
             }
@@ -282,20 +224,23 @@ public class GameEngine
         List<StateSpace> possibleStates = stateFactory.CreatePossibleStates();
         int indexOfMostFavorableState = 0;
         int highestValue = int.MinValue;
-        //Debug.Log("POSSIBLE NODES AND THEIR VALUES");
+        Expectiminimax.counter = 0;
+        Debug.Log("POSSIBLE NODES AND THEIR VALUES");
         for (int i = 0; i < possibleStates.Count; i++)
         {
-            Node node = new Node(possibleStates[i], NodeType.CHANCE_AFTER_MAX);
-            int actualValue = Expectiminimax.CalculateNodeValue(node, difficulty);
+            Node node = new Node(possibleStates[i], NodeType.CHANCE_AFTER_MAX, 1);
+            int actualValue = Expectiminimax.CalculateNodeValue(node, difficulty, int.MinValue, int.MaxValue);
             if (actualValue > highestValue)
             {
                 highestValue = actualValue;
                 indexOfMostFavorableState = i;
             }
-            //Debug.Log("NODE " + i);
-            //DebugNode(possibleStates[i], actualValue);
+            Debug.Log("NODE " + i);
+            DebugNode(possibleStates[i], actualValue);
         }
-        //Debug.Log("CHOSEN NODE: " + indexOfMostFavorableState);
+        Debug.Log("CHOSEN NODE: " + indexOfMostFavorableState);
+        Debug.Log("Calculated nodes: " + Expectiminimax.counter);
+        Expectiminimax.counter = 0;
         Card playedCard = currentState.CardsAtAI.First(c => !possibleStates[indexOfMostFavorableState].CardsAtAI.Contains(c));
         var collectedFromMiddle = currentState.CardsInMiddle.Where(c => possibleStates[indexOfMostFavorableState].CardsCollectedByAI.Contains(c));
         currentState = possibleStates[indexOfMostFavorableState];
@@ -313,39 +258,6 @@ public class GameEngine
             sb.Append(card + ", ");
         }
         sb.Append("VALUE: " + value);
-        Debug.Log(sb.ToString());
-    }
-
-    public void DebugLog()
-    {
-        StringBuilder sb = new StringBuilder();
-        //sb.Append("Cards at player:\n");
-        //foreach (var item in State.CardsAtPlayer)
-        //{
-        //    sb.Append("- " + item);
-        //}
-        //sb.Append("\nCards at robot:\n");
-        //foreach (var item in State.CardsAtAI)
-        //{
-        //    sb.Append("- " + item);
-        //}
-        sb.Append("\nCards in middle:\n");
-        foreach (var item in currentState.CardsInMiddle)
-        {
-            sb.Append(" - " + item);
-        }
-
-        sb.Append("\nCards collected by player: \n");
-        foreach (var card in currentState.CardsCollectedByPlayer)
-        {
-            sb.Append(card + " - ");
-        }
-        sb.Append("\nCards collected by robot: \n");
-        foreach (var card in currentState.CardsCollectedByAI)
-        {
-            sb.Append(card + " - ");
-        }
-
         Debug.Log(sb.ToString());
     }
 }

@@ -1,7 +1,6 @@
 using Assets.Scripts;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public class Node
 {
@@ -17,12 +16,14 @@ public class Node
     public NodeType Type { get; }
     public int Value { get; }
     public bool IsTerminal { get; }
+    public float Probability { get; }
 
-    public Node(StateSpace state, NodeType type)
+    public Node(StateSpace state, NodeType type, float probability)
     {
         State = state;
         Type = type;
         Value = CalculateValue();
+        Probability = probability;
         // ha már kijátszottak minden lapot, felesleges tovább számolgatni
         IsTerminal = !State.CardsAtAI.Any() && State.CardsAtPlayer.Any();
     }
@@ -33,9 +34,10 @@ public class Node
         stateFactory.InitialState = State;
         stateFactory.NodeType = Type;
         List<StateSpace> states = stateFactory.CreatePossibleStates();
+        float probability = (Type == NodeType.CHANCE_AFTER_MAX || Type == NodeType.CHANCE_AFTER_MIN) ? 1f / states.Count : 1;
         foreach (var state in states)
         {
-            children.Add(new Node(state, whichNodeTypeNext[Type]));
+            children.Add(new Node(state, whichNodeTypeNext[Type], probability));
         } 
         return children;
     }

@@ -1,11 +1,15 @@
 using System;
+using UnityEngine;
 
 public static class Expectiminimax
 {
-    public static int CalculateNodeValue(Node node, int depth)
+    public static int counter = 0;
+
+    public static int CalculateNodeValue(Node node, int depth, int alpha, int beta)
     {
         if (depth == 0 || node.IsTerminal)
         {
+            counter++;
             return node.Value;
         }
 
@@ -14,7 +18,11 @@ public static class Expectiminimax
             int maxValue = int.MinValue;
             foreach (Node child in node.GetChildNodes())
             {
-                maxValue = Math.Max(maxValue, CalculateNodeValue(child, depth - 1));
+                counter++;
+                maxValue = Math.Max(maxValue, CalculateNodeValue(child, depth - 1, alpha, beta));
+                if (maxValue > beta)
+                    break;
+                alpha = Math.Max(alpha, maxValue);
             }
             return maxValue;
         }
@@ -24,7 +32,11 @@ public static class Expectiminimax
             int minValue = int.MaxValue;
             foreach (Node child in node.GetChildNodes())
             {
-                minValue = Math.Min(minValue, CalculateNodeValue(child, depth - 1));
+                counter++;
+                minValue = Math.Min(minValue, CalculateNodeValue(child, depth - 1, alpha, beta));
+                if (minValue < alpha)
+                    break;
+                beta = Math.Min(beta, minValue);
             }
             return minValue;
         }
@@ -33,7 +45,8 @@ public static class Expectiminimax
         float expectedValue = 0;
         foreach (Node child in node.GetChildNodes())
         {
-            expectedValue += CalculateNodeValue(child, depth - 1) * child.State.Probability;
+            counter++;
+            expectedValue += CalculateNodeValue(child, depth - 1, alpha, beta) * child.Probability;
         }
         return (int)expectedValue;
     }

@@ -214,7 +214,6 @@ public class Setup : MonoBehaviour
         GameEngine.RED_DECK.Add(new Card(December3Red, 123, CardType.CHAFF, Month.DECEMBER));
         GameEngine.RED_DECK.Add(new Card(December4Red, 124, CardType.CHAFF, Month.DECEMBER));
 
-        //GameEngine.FULL_DECK = GE.deck;
         GE.CopyDeck();
 
         await GE.DealCards();
@@ -244,8 +243,7 @@ public class Setup : MonoBehaviour
 
             GameObject opponentCard = Instantiate(CardPrefab, new Vector2(0, 0), Quaternion.identity);
             image = opponentCard.GetComponent<RawImage>();
-            image.texture = opponentCards[i].FrontPic;
-            //image.texture = BlackBack;
+            image.texture = BlackBack;
             opponentCard.name = opponentCards[i].Id.ToString();
             OpponentArea.GetComponent<OpponentAreaScript>().Receive(opponentCard);
         }
